@@ -1,0 +1,28 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostList from "../components/PostList.astro";
+
+const posts = (await getCollection("posts"))
+  .filter((post) => post.data.tags.includes("networking"))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="Networking | adi" description="Networking posts by Adi.">
+  <section class="page-header">
+    <p class="eyebrow">Topic</p>
+    <h1>Networking</h1>
+    <p>
+      Posts about networking behavior, traffic flow, protocols, infrastructure
+      patterns, and production debugging.
+    </p>
+  </section>
+
+  <section class="post-list" aria-label="Networking posts">
+    <div class="section-heading">
+      <h2>Networking posts</h2>
+      <p>{posts.length} post{posts.length === 1 ? "" : "s"}</p>
+    </div>
+    <PostList posts={posts} emptyMessage="No networking posts yet." />
+  </section>
+</BaseLayout>

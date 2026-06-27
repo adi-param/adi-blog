@@ -1,6 +1,8 @@
-# adi-blog
+# adi
 
 A static blog that publishes selected Markdown files from other repositories.
+
+Live site: https://adi-param.github.io/adi-blog/
 
 The blog uses `posts.yml` as a manifest. Each entry points to a raw Markdown file, and the build script fetches those files before Astro builds the site.
 

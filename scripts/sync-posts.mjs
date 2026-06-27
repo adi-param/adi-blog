@@ -49,7 +49,6 @@ async function main() {
     throw new Error("posts.yml must contain a top-level posts array.");
   }
 
-  await fs.rm(outputDir, { force: true, recursive: true });
   await fs.mkdir(outputDir, { recursive: true });
 
   for (const post of posts) {

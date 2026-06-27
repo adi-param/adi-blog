@@ -1,43 +1,30 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import PostList from "../components/PostList.astro";
 
 const posts = (await getCollection("posts")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
 ---
 
-<BaseLayout title="adi-blog" description="Networking notes and technical writeups.">
-  <section class="intro">
-    <h1>Technical notes, kept close to the source.</h1>
+<BaseLayout title="adi" description="Technical notes and writeups by Adi.">
+  <section class="blog-hero">
+    <div>
+      <p class="eyebrow">Personal technical blog</p>
+      <h1>Notes on software, security, infrastructure, and systems.</h1>
+    </div>
     <p>
-      This blog publishes selected Markdown files from source repositories and
-      renders them as posts.
+      Practical writeups from topics I am learning, building, operating, or
+      debugging. Posts are listed here across every topic in recent order.
     </p>
   </section>
 
-  <section class="post-list" aria-label="Posts">
-    {
-      posts.map((post) => (
-        <article class="post-card">
-          <p class="post-date">
-            {post.data.date.toLocaleDateString("en", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
-          </p>
-          <h2>
-            <a href={`/posts/${post.slug}/`}>{post.data.title}</a>
-          </h2>
-          <p>{post.data.description}</p>
-          <ul class="tags" aria-label="Tags">
-            {post.data.tags.map((tag) => (
-              <li>{tag}</li>
-            ))}
-          </ul>
-        </article>
-      ))
-    }
+  <section class="post-list" aria-label="All posts">
+    <div class="section-heading">
+      <h2>All posts</h2>
+      <p>{posts.length} post{posts.length === 1 ? "" : "s"}</p>
+    </div>
+    <PostList posts={posts} emptyMessage="Posts will appear here as they are published." />
   </section>
 </BaseLayout>

@@ -1,0 +1,50 @@
+---
+interface Post {
+  slug: string;
+  data: {
+    title: string;
+    description: string;
+    date: Date;
+    tags: string[];
+  };
+}
+
+interface Props {
+  posts: Post[];
+  emptyMessage: string;
+}
+
+const { posts, emptyMessage } = Astro.props;
+const base = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+---
+
+{
+  posts.map((post) => (
+    <article class="post-card">
+      <div class="post-meta">
+        <time datetime={post.data.date.toISOString()}>
+          {post.data.date.toLocaleDateString("en", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}
+        </time>
+        <ul class="tags" aria-label="Tags">
+          {post.data.tags.map((tag) => (
+            <li>{tag}</li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h3>
+          <a href={`${base}posts/${post.slug}/`}>{post.data.title}</a>
+        </h3>
+        <p>{post.data.description}</p>
+      </div>
+    </article>
+  ))
+}
+
+{posts.length === 0 && <p class="empty-state">{emptyMessage}</p>}
