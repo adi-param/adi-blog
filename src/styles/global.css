@@ -373,12 +373,16 @@ main {
   border-collapse: collapse;
 }
 
+.content p:has(> img:only-child) {
+  margin: 28px 0;
+}
+
 .content img {
   display: block;
-  width: 100%;
+  width: min(100%, 920px);
   max-width: 100%;
   height: auto;
-  margin: 28px 0;
+  margin: 0 auto;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
