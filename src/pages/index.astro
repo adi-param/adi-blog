@@ -1,0 +1,43 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const posts = (await getCollection("posts")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<BaseLayout title="adi-blog" description="Networking notes and technical writeups.">
+  <section class="intro">
+    <h1>Technical notes, kept close to the source.</h1>
+    <p>
+      This blog publishes selected Markdown files from source repositories and
+      renders them as posts.
+    </p>
+  </section>
+
+  <section class="post-list" aria-label="Posts">
+    {
+      posts.map((post) => (
+        <article class="post-card">
+          <p class="post-date">
+            {post.data.date.toLocaleDateString("en", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
+          </p>
+          <h2>
+            <a href={`/posts/${post.slug}/`}>{post.data.title}</a>
+          </h2>
+          <p>{post.data.description}</p>
+          <ul class="tags" aria-label="Tags">
+            {post.data.tags.map((tag) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+        </article>
+      ))
+    }
+  </section>
+</BaseLayout>
