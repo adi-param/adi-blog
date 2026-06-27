@@ -1,0 +1,14 @@
+sources:
+  - name: networking-wiki
+    repo: adi-param/networking-wiki
+    branch: main
+    localPath: ../networking-wiki
+    paths:
+      - docs/**/*.md
+
+  - name: enterprise-security-governance
+    repo: adi-param/enterprise-security-governance
+    branch: main
+    localPath: ../enterprise-security-governance
+    paths:
+      - docs/**/*.md

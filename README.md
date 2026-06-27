@@ -4,12 +4,12 @@ A static blog that publishes selected Markdown files from other repositories.
 
 Live site: https://adi-param.github.io/adi-blog/
 
-The blog uses `posts.yml` as a manifest. Each entry points to a raw Markdown file, and the build script fetches those files before Astro builds the site.
+The blog uses `sources.yml` as a source registry. Source Markdown files opt in to publishing with `blog.publish: true` frontmatter, and the build script fetches those files before Astro builds the site.
 
 ## How It Works
 
 ```text
-posts.yml
+sources.yml
   -> scripts/sync-posts.mjs
   -> src/content/posts/
   -> Astro build
@@ -24,22 +24,37 @@ npm install
 npm run dev
 ```
 
-## Add a Post
+## Add a Source Repository
 
-Add an entry to `posts.yml`:
+Add a source repository to `sources.yml`:
 
 ```yaml
-posts:
-  - slug: forward-proxy-and-reverse-proxy
-    title: Forward Proxy and Reverse Proxy
-    description: A practical explanation of proxies, forward proxies, reverse proxies, VPNs, load balancers, and ingress controllers.
-    date: 2026-06-27
-    source: https://raw.githubusercontent.com/adi-param/networking-wiki/main/docs/architectures/proxies.md
-    sourceUrl: https://github.com/adi-param/networking-wiki/blob/main/docs/architectures/proxies.md
-    tags:
-      - networking
-      - proxies
-      - architecture
+sources:
+  - name: enterprise-security-governance
+    repo: adi-param/enterprise-security-governance
+    branch: main
+    paths:
+      - docs/**/*.md
+```
+
+## Publish a Post
+
+Add this frontmatter to a Markdown file in a configured source repository:
+
+```yaml
+---
+blog:
+  publish: true
+  slug: saas-vendor-security-evaluation
+  title: SaaS Vendor Security Evaluation
+  description: Why SaaS vendor security reviews matter and how to evaluate vendors.
+  date: 2026-06-27
+  tags:
+    - cybersecurity
+    - governance
+    - vendor-risk
+    - saas
+---
 ```
 
 Then run:
