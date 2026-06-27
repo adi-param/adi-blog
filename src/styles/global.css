@@ -81,6 +81,7 @@ main {
 }
 
 .blog-hero p,
+.home-about p,
 .page-header p,
 .post-card p,
 .post-header p,
@@ -115,6 +116,23 @@ main {
 .blog-hero > p {
   margin: 0;
   font-size: 1.08rem;
+}
+
+.home-about {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+  gap: 32px;
+  padding: 64px 0 36px;
+}
+
+.home-about h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.home-about p {
+  max-width: 680px;
+  margin: 0 0 12px;
 }
 
 .section-heading {
@@ -355,6 +373,17 @@ main {
   border-collapse: collapse;
 }
 
+.content img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 28px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
 .content th,
 .content td {
   padding: 10px 12px;
@@ -393,6 +422,11 @@ main {
   }
 
   .post-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .home-about {
     grid-template-columns: 1fr;
     gap: 12px;
   }

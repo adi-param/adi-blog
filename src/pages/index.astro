@@ -9,15 +9,21 @@ const posts = (await getCollection("posts")).sort(
 ---
 
 <BaseLayout title="adi" description="Technical notes and writeups by Adi.">
-  <section class="blog-hero">
+  <section class="home-about" aria-label="About me">
     <div>
-      <p class="eyebrow">Personal technical blog</p>
-      <h1>Notes on software, security, infrastructure, and systems.</h1>
+      <p class="eyebrow">About me</p>
+      <h2>Hi, I’m Adi.</h2>
     </div>
-    <p>
-      Practical writeups from topics I am learning, building, operating, or
-      debugging. Posts are listed here across every topic in recent order.
-    </p>
+    <div>
+      <p>
+        I work on cybersecurity, cloud security, DevSecOps, and production
+        infrastructure. This site is where I share technical explanations,
+        architecture notes, and practical knowledge from those areas.
+      </p>
+      <a href={`${import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`}about/`}>
+        More about me
+      </a>
+    </div>
   </section>
 
   <section class="post-list" aria-label="All posts">
