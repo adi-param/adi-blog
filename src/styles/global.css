@@ -75,9 +75,24 @@ main {
 
 .site-title {
   color: var(--text);
-  font-size: 1.05rem;
   font-weight: 700;
   text-decoration: none;
+}
+
+.site-title span {
+  display: block;
+}
+
+.site-title span:first-child {
+  font-size: 1.05rem;
+}
+
+.site-title span:last-child {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .blog-hero p,
