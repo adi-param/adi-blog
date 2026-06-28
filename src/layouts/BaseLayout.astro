@@ -28,17 +28,22 @@ const csp = [
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {import.meta.env.PROD && (
       <meta http-equiv="Content-Security-Policy" content={csp} />
     )}
+    <meta name="color-scheme" content="light" data-color-scheme-meta />
+    <meta name="theme-color" content="#f7f8fa" data-theme-color-meta />
     <meta name="description" content={description} />
     <title>{title}</title>
     <script is:inline>
       (() => {
+        const lightThemeColor = "#f7f8fa";
+        const darkThemeColor = "#0d1117";
+
         const getStoredTheme = () => {
           try {
             return localStorage.getItem("theme");
@@ -46,10 +51,26 @@ const csp = [
             return null;
           }
         };
-        const storedTheme = getStoredTheme();
+        const normalizeTheme = (theme) =>
+          theme === "light" || theme === "dark" ? theme : null;
+        const storedTheme = normalizeTheme(getStoredTheme());
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.dataset.theme =
-          storedTheme || (prefersDark ? "dark" : "light");
+        const theme = storedTheme || (prefersDark ? "dark" : "light");
+        const colorSchemeMeta = document.querySelector("[data-color-scheme-meta]");
+        const themeColorMeta = document.querySelector("[data-theme-color-meta]");
+
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme =
+          theme === "dark" ? "dark" : "only light";
+        if (colorSchemeMeta) {
+          colorSchemeMeta.setAttribute("content", theme === "dark" ? "dark" : "light");
+        }
+        if (themeColorMeta) {
+          themeColorMeta.setAttribute(
+            "content",
+            theme === "dark" ? darkThemeColor : lightThemeColor
+          );
+        }
       })();
     </script>
   </head>
@@ -87,10 +108,28 @@ const csp = [
       (() => {
         const button = document.querySelector("[data-theme-toggle]");
         const state = document.querySelector("[data-theme-toggle-state]");
+        const colorSchemeMeta = document.querySelector("[data-color-scheme-meta]");
+        const themeColorMeta = document.querySelector("[data-theme-color-meta]");
+        const lightThemeColor = "#f7f8fa";
+        const darkThemeColor = "#0d1117";
         if (!button) return;
 
         const applyTheme = (theme) => {
           document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme =
+            theme === "dark" ? "dark" : "only light";
+          if (colorSchemeMeta) {
+            colorSchemeMeta.setAttribute(
+              "content",
+              theme === "dark" ? "dark" : "light"
+            );
+          }
+          if (themeColorMeta) {
+            themeColorMeta.setAttribute(
+              "content",
+              theme === "dark" ? darkThemeColor : lightThemeColor
+            );
+          }
           if (state) {
             state.textContent = theme === "dark" ? "Dark" : "Light";
           }

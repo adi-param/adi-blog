@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light;
+  color-scheme: only light;
   --bg: #f7f8fa;
   --text: #111827;
   --muted: #4b5563;
@@ -17,6 +17,10 @@
   --toggle-border: #bfccdb;
   --toggle-thumb: #ffffff;
   --toggle-icon: #0f5f8f;
+}
+
+html[data-theme="light"] {
+  color-scheme: only light;
 }
 
 html[data-theme="dark"] {
