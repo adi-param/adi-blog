@@ -1,0 +1,28 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostList from "../components/PostList.astro";
+
+const posts = (await getCollection("posts"))
+  .filter((post) => post.data.tags.includes("cybersecurity"))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="Cybersecurity | Adi" description="Cybersecurity posts by Adi.">
+  <section class="page-header">
+    <p class="eyebrow">Topic</p>
+    <h1>Cybersecurity</h1>
+    <p>
+      Posts on cybersecurity, cloud security, DevSecOps, governance, threat
+      modelling, and security operations.
+    </p>
+  </section>
+
+  <section class="post-list" aria-label="Cybersecurity posts">
+    <div class="section-heading">
+      <h2>Cybersecurity posts</h2>
+      <p>{posts.length} post{posts.length === 1 ? "" : "s"}</p>
+    </div>
+    <PostList posts={posts} emptyMessage="No cybersecurity posts yet." />
+  </section>
+</BaseLayout>
