@@ -1,4 +1,4 @@
-# Adi Param · Cybersecurity & DevOps
+# Adi · Cybersecurity & DevOps
 
 A static blog that publishes selected Markdown files from other repositories.
 
