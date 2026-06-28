@@ -47,7 +47,7 @@ const csp = [
       <meta http-equiv="Content-Security-Policy" content={csp} />
     )}
     <meta name="color-scheme" content="light" data-color-scheme-meta />
-    <meta name="theme-color" content="#f7f8fa" data-theme-color-meta />
+    <meta name="theme-color" content="#eef6fb" data-theme-color-meta />
     <meta name="description" content={description} />
     <meta name="author" content="Adi" />
     <link rel="canonical" href={canonicalUrl} />
@@ -70,7 +70,7 @@ const csp = [
     <title>{title}</title>
     <script is:inline>
       (() => {
-        const lightThemeColor = "#f7f8fa";
+        const lightThemeColor = "#eef6fb";
         const darkThemeColor = "#0d1117";
 
         const getStoredTheme = () => {
@@ -147,7 +147,7 @@ const csp = [
         const state = document.querySelector("[data-theme-toggle-state]");
         const colorSchemeMeta = document.querySelector("[data-color-scheme-meta]");
         const themeColorMeta = document.querySelector("[data-theme-color-meta]");
-        const lightThemeColor = "#f7f8fa";
+        const lightThemeColor = "#eef6fb";
         const darkThemeColor = "#0d1117";
         if (!button) return;
 

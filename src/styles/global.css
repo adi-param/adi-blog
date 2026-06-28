@@ -1,22 +1,22 @@
 :root {
   color-scheme: only light;
-  --bg: #f7f8fa;
-  --text: #111827;
-  --muted: #4b5563;
-  --subtle: #6b7280;
-  --border: #d8dee8;
-  --link: #0f5f8f;
-  --accent: #0f766e;
-  --surface: #ffffff;
-  --surface-soft: #eef2f7;
-  --surface-tint: rgba(255, 255, 255, 0.72);
-  --table-bg: rgba(255, 255, 255, 0.64);
-  --grid-line: rgba(17, 24, 39, 0.035);
+  --bg: #eef6fb;
+  --text: #102033;
+  --muted: #45566a;
+  --subtle: #687a8f;
+  --border: #c9ddea;
+  --link: #075985;
+  --accent: #0e7490;
+  --surface: #fbfdff;
+  --surface-soft: #e3f0f8;
+  --surface-tint: rgba(251, 253, 255, 0.78);
+  --table-bg: rgba(251, 253, 255, 0.7);
+  --grid-line: rgba(7, 89, 133, 0.055);
   --code-bg: #111827;
-  --toggle-bg: #dce3ed;
-  --toggle-border: #bfccdb;
+  --toggle-bg: #d8e9f4;
+  --toggle-border: #a9c7da;
   --toggle-thumb: #ffffff;
-  --toggle-icon: #0f5f8f;
+  --toggle-icon: #075985;
 }
 
 html[data-theme="light"] {
@@ -83,7 +83,6 @@ main {
 
 .site-header {
   padding: 22px 0;
-  border-bottom: 1px solid var(--border);
 }
 
 .site-nav {
@@ -277,8 +276,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   justify-content: space-between;
   gap: 24px;
   padding: 18px 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
 }
 
 .section-heading h2 {
@@ -309,7 +306,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   grid-template-columns: minmax(160px, 220px) 1fr;
   gap: 32px;
   padding: 28px 0;
-  border-bottom: 1px solid var(--border);
 }
 
 .post-card h3 {
@@ -401,7 +397,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   padding: 5px 10px;
   color: var(--muted);
   background: var(--surface-tint);
-  border: 1px solid var(--border);
   border-radius: 999px;
   font-size: 0.88rem;
   text-decoration: none;
@@ -420,7 +415,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
 .tag-browser a:hover,
 .post-tags a:hover {
   color: var(--link);
-  border-color: var(--link);
 }
 
 .post {
@@ -449,7 +443,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   grid-template-columns: minmax(0, 1fr) 280px;
   gap: 56px;
   padding: 0 0 84px;
-  border-top: 1px solid var(--border);
 }
 
 .about-main {
@@ -476,7 +469,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   margin-top: 32px;
   padding: 20px;
   background: var(--surface-tint);
-  border: 1px solid var(--border);
   border-radius: 8px;
 }
 
@@ -510,7 +502,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
 
 .post-header {
   padding-bottom: 32px;
-  border-bottom: 1px solid var(--border);
 }
 
 .post-header-top {
@@ -550,7 +541,7 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   height: 34px;
   color: var(--muted);
   background: var(--surface-tint);
-  border: 1px solid var(--border);
+  border: 0;
   border-radius: 999px;
   cursor: pointer;
   font: inherit;
@@ -561,7 +552,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
 .copy-link-button:hover,
 .copy-link-button[data-copied="true"] {
   color: var(--link);
-  border-color: var(--link);
 }
 
 .share-links svg,
@@ -601,7 +591,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   margin: 24px 0 8px;
   padding: 18px;
   background: var(--surface-tint);
-  border: 1px solid var(--border);
   border-radius: 8px;
 }
 
@@ -652,7 +641,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
 .content blockquote {
   margin: 24px 0;
   padding-left: 18px;
-  border-left: 4px solid var(--accent);
   color: var(--text);
   font-weight: 600;
 }
@@ -674,7 +662,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   max-width: 100%;
   height: auto;
   margin: 0 auto;
-  border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
 }
@@ -682,7 +669,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
 .content th,
 .content td {
   padding: 10px 12px;
-  border: 1px solid var(--border);
   background: var(--table-bg);
   text-align: left;
   vertical-align: top;
@@ -711,7 +697,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   width: min(100% - 40px, 1040px);
   margin: 0 auto;
   padding: 26px 0 34px;
-  border-top: 1px solid var(--border);
   color: var(--subtle);
   font-size: 0.92rem;
 }
