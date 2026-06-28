@@ -8,6 +8,23 @@ const root = process.cwd();
 const sourcesPath = path.join(root, "sources.yml");
 const outputDir = path.resolve(root, process.env.POSTS_OUTPUT_DIR ?? "src/content/posts");
 
+// gray-matter ships a JavaScript frontmatter engine that calls eval(). Because
+// posts are parsed from remote source repos, disable it so only YAML is parsed.
+function rejectJsFrontmatter() {
+  throw new Error("JavaScript frontmatter is not allowed.");
+}
+
+const matterOptions = {
+  engines: {
+    javascript: rejectJsFrontmatter,
+    js: rejectJsFrontmatter,
+  },
+};
+
+// Slugs become filenames and URL routes, so constrain them to a safe charset
+// to prevent path traversal (e.g. "../../astro.config") during the build.
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
 function required(value, field, slug = "unknown") {
   if (!value) {
     throw new Error(`Missing required field "${field}" for post "${slug}".`);
@@ -149,15 +166,23 @@ async function discoverPosts(source) {
       hasLocalRoot
         ? await fs.readFile(path.join(localRoot, filePath), "utf8")
         : await fetchMarkdown(rawUrl(source, filePath));
-    const parsed = matter(markdown);
+    const parsed = matter(markdown, matterOptions);
     const blog = parsed.data?.blog;
 
     if (!blog?.publish) {
       continue;
     }
 
+    const slug = required(blog.slug, "blog.slug", filePath);
+
+    if (!SLUG_PATTERN.test(slug)) {
+      throw new Error(
+        `Invalid slug "${slug}" in ${filePath}: must match ${SLUG_PATTERN}.`
+      );
+    }
+
     posts.push({
-      slug: required(blog.slug, "blog.slug", filePath),
+      slug,
       title: required(blog.title, "blog.title", filePath),
       description: required(blog.description, "blog.description", filePath),
       date: required(blog.date, "blog.date", filePath),
