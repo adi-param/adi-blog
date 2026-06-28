@@ -12,34 +12,160 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 const base = import.meta.env.BASE_URL.endsWith("/")
   ? import.meta.env.BASE_URL
   : `${import.meta.env.BASE_URL}/`;
+const postUrl = new URL(
+  `${base}posts/${post.slug}/`,
+  Astro.site ?? "https://adi-param.github.io"
+).toString();
+const tableOfContents = headings.filter((heading) => heading.depth === 2);
+const wordCount = post.body.trim().split(/\s+/).filter(Boolean).length;
+const readingMinutes = Math.max(1, Math.ceil(wordCount / 180));
+const encodedPostUrl = encodeURIComponent(postUrl);
+const encodedPostTitle = encodeURIComponent(post.data.title);
+const shareLinks = [
+  {
+    label: "LinkedIn",
+    icon: "linkedin",
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedPostUrl}`,
+  },
+  {
+    label: "X",
+    icon: "x",
+    href: `https://twitter.com/intent/tweet?url=${encodedPostUrl}&text=${encodedPostTitle}`,
+  },
+  {
+    label: "Email",
+    icon: "email",
+    href: `mailto:?subject=${encodedPostTitle}&body=${encodedPostUrl}`,
+  },
+];
 ---
 
-<BaseLayout title={`${post.data.title} | Adi`} description={post.data.description}>
+<BaseLayout
+  title={`${post.data.title} | Adi`}
+  description={post.data.description}
+  image={post.data.image}
+  type="article"
+  publishedTime={post.data.date.toISOString()}
+>
   <article class="post">
     <header class="post-header">
-      <a class="back-link" href={base}>Back to posts</a>
+      <div class="post-header-top">
+        <a class="back-link" href={base}>Back to posts</a>
+        <nav class="share-links" aria-label="Share this post">
+          <span>Share</span>
+          {
+            shareLinks.map((link) => (
+              <a
+                href={link.href}
+                aria-label={`Share on ${link.label}`}
+                title={`Share on ${link.label}`}
+                target={link.href.startsWith("mailto:") ? undefined : "_blank"}
+                rel={link.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+              >
+                {link.icon === "linkedin" && (
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.36 8.02h4.28V23H.36V8.02Zm7.2 0h4.1v2.05h.06c.57-1.08 1.97-2.22 4.05-2.22 4.33 0 5.13 2.85 5.13 6.55V23h-4.27v-7.62c0-1.82-.03-4.16-2.53-4.16-2.54 0-2.93 1.98-2.93 4.02V23H7.56V8.02Z" />
+                  </svg>
+                )}
+                {link.icon === "x" && (
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M18.9 2h3.68l-8.04 9.19L24 22h-7.4l-5.8-6.98L4.17 22H.48l8.6-9.83L0 2h7.6l5.24 6.34L18.9 2Zm-1.29 18.1h2.04L6.5 3.8H4.3l13.31 16.3Z" />
+                  </svg>
+                )}
+                {link.icon === "email" && (
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M3 5h18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 3.24V17h18V8.24l-8.35 5.02a1.27 1.27 0 0 1-1.3 0L3 8.24ZM4.1 7 12 11.74 19.9 7H4.1Z" />
+                  </svg>
+                )}
+                <span>{link.label}</span>
+              </a>
+            ))
+          }
+          <button
+            class="copy-link-button"
+            type="button"
+            data-copy-link={postUrl}
+            aria-label="Copy link"
+            title="Copy link"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M9.2 17.3a1 1 0 0 1-1.4 1.4l-1.6-1.6a5 5 0 0 1 0-7.07l2.12-2.12a5 5 0 0 1 7.07 0l.7.7a1 1 0 1 1-1.42 1.42l-.7-.7a3 3 0 0 0-4.24 0l-2.12 2.12a3 3 0 0 0 0 4.24l1.59 1.61Zm5.6-10.6a1 1 0 0 1 1.4-1.4l1.6 1.6a5 5 0 0 1 0 7.07l-2.12 2.12a5 5 0 0 1-7.07 0l-.7-.7a1 1 0 1 1 1.42-1.42l.7.7a3 3 0 0 0 4.24 0l2.12-2.12a3 3 0 0 0 0-4.24L14.8 6.7Zm-5.1 6.2a1 1 0 1 1 0-2h4.6a1 1 0 1 1 0 2H9.7Z" />
+            </svg>
+            <span>Copy link</span>
+          </button>
+        </nav>
+      </div>
       <p class="post-date">
-        {
+        Published {
           post.data.date.toLocaleDateString("en", {
             year: "numeric",
             month: "short",
             day: "numeric",
           })
-        }
+        } · {readingMinutes} min read
       </p>
       <h1>{post.data.title}</h1>
       <p>{post.data.description}</p>
+      <ul class="post-tags" aria-label="Tags">
+        {
+          post.data.tags.map((tag) => (
+            <li>
+              <a href={`${base}tags/${tag}/`}>{tag}</a>
+            </li>
+          ))
+        }
+      </ul>
       <div class="post-actions">
         <a href={post.data.sourceUrl}>Source on GitHub</a>
       </div>
     </header>
 
+    {
+      tableOfContents.length > 2 && (
+        <nav class="post-toc" aria-label="Table of contents">
+          <h2>On this page</h2>
+          <ol>
+            {tableOfContents.map((heading) => (
+              <li>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
+
     <div class="content">
       <Content />
     </div>
   </article>
+  <script is:inline>
+    (() => {
+      const button = document.querySelector("[data-copy-link]");
+      if (!button) return;
+
+      button.addEventListener("click", async () => {
+        const url = button.getAttribute("data-copy-link");
+        if (!url) return;
+
+        try {
+          await navigator.clipboard.writeText(url);
+          button.dataset.copied = "true";
+          button.setAttribute("title", "Copied");
+          button.setAttribute("aria-label", "Copied link");
+          window.setTimeout(() => {
+            button.dataset.copied = "false";
+            button.setAttribute("title", "Copy link");
+            button.setAttribute("aria-label", "Copy link");
+          }, 1800);
+        } catch {
+          window.location.href = url;
+        }
+      });
+    })();
+  </script>
 </BaseLayout>

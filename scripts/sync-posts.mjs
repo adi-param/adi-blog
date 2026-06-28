@@ -1,12 +1,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import matter from "gray-matter";
 import yaml from "js-yaml";
 
 const root = process.cwd();
 const sourcesPath = path.join(root, "sources.yml");
 const outputDir = path.resolve(root, process.env.POSTS_OUTPUT_DIR ?? "src/content/posts");
+const execFileAsync = promisify(execFile);
 
 // gray-matter ships a JavaScript frontmatter engine that calls eval(). Because
 // posts are parsed from remote source repos, disable it so only YAML is parsed.
@@ -36,6 +39,7 @@ function serializeFrontmatter(post) {
   return matter.stringify("", {
     title: required(post.title, "title", post.slug),
     description: required(post.description, "description", post.slug),
+    ...(post.image ? { image: post.image } : {}),
     date: required(post.date, "date", post.slug),
     tags: post.tags ?? [],
     source: required(post.source, "source", post.slug),
@@ -72,6 +76,44 @@ function sourceUrl(source, filePath) {
 
 function rawUrl(source, filePath) {
   return `https://raw.githubusercontent.com/${source.repo}/${source.branch}/${filePath}`;
+}
+
+async function latestLocalCommitDate(localRoot, filePath) {
+  try {
+    const { stdout } = await execFileAsync(
+      "git",
+      ["-C", localRoot, "log", "-1", "--format=%cI", "--", filePath],
+      { timeout: 10000 }
+    );
+    return stdout.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+async function latestRemoteCommitDate(source, filePath) {
+  const url = new URL(`https://api.github.com/repos/${source.repo}/commits`);
+  url.searchParams.set("sha", source.branch);
+  url.searchParams.set("path", filePath);
+  url.searchParams.set("per_page", "1");
+
+  try {
+    const commits = await fetchJson(url.toString());
+    return commits?.[0]?.commit?.committer?.date ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function latestCommitDate(source, filePath, localRoot, hasLocalRoot) {
+  if (hasLocalRoot && localRoot) {
+    const localDate = await latestLocalCommitDate(localRoot, filePath);
+    if (localDate) {
+      return localDate;
+    }
+  }
+
+  return latestRemoteCommitDate(source, filePath);
 }
 
 async function pathExists(filePath) {
@@ -185,7 +227,10 @@ async function discoverPosts(source) {
       slug,
       title: required(blog.title, "blog.title", filePath),
       description: required(blog.description, "blog.description", filePath),
-      date: required(blog.date, "blog.date", filePath),
+      image: blog.image,
+      date:
+        (await latestCommitDate(source, filePath, localRoot, hasLocalRoot)) ??
+        required(blog.date, "blog.date", filePath),
       tags: blog.tags ?? [],
       source: rawUrl(source, filePath),
       sourceUrl: sourceUrl(source, filePath),
