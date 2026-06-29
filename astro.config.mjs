@@ -1,8 +1,8 @@
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  site: "https://adi-param.github.io",
-  base: "/adi-blog",
+  site: "https://adiparamkusam.com",
+  base: "/",
   markdown: {
     shikiConfig: {
       theme: "github-dark",
