@@ -12,3 +12,10 @@ sources:
     localPath: ../enterprise-security-governance
     paths:
       - docs/**/*.md
+
+  - name: aws
+    repo: adi-param/aws
+    branch: main
+    localPath: ../aws
+    paths:
+      - docs/**/*.md
