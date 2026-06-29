@@ -4,6 +4,7 @@ interface Post {
   data: {
     title: string;
     description: string;
+    image?: string;
     date: Date;
     updated?: Date;
     tags: string[];
@@ -40,7 +41,12 @@ const base = import.meta.env.BASE_URL.endsWith("/")
           ))}
         </ul>
       </div>
-      <div>
+      <div class="post-card-body">
+        {post.data.image && (
+          <a class="post-card-image" href={`${base}posts/${post.slug}/`} aria-label={post.data.title}>
+            <img src={post.data.image} alt="" loading="lazy" />
+          </a>
+        )}
         <h3>
           <a href={`${base}posts/${post.slug}/`}>{post.data.title}</a>
         </h3>

@@ -1,0 +1,40 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const posts = await getCollection("posts");
+const base = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+const tags = [
+  ...posts.reduce<Map<string, number>>((counts, post) => {
+    post.data.tags.forEach((tag) => {
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    });
+    return counts;
+  }, new Map()),
+].sort(([tagA, countA], [tagB, countB]) => countB - countA || tagA.localeCompare(tagB));
+---
+
+<BaseLayout title="Tags | Adi" description="Browse all post tags.">
+  <section class="page-header">
+    <p class="eyebrow">Browse</p>
+    <h1>Tags</h1>
+    <p>Explore posts by topic, tool, architecture pattern, or security domain.</p>
+  </section>
+
+  <section class="tags-index" aria-label="All tags">
+    <ul>
+      {
+        tags.map(([tag, count]) => (
+          <li>
+            <a href={`${base}tags/${tag}/`}>
+              <span>{tag}</span>
+              <strong>{count}</strong>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>

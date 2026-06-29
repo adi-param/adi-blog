@@ -47,7 +47,7 @@ const csp = [
       <meta http-equiv="Content-Security-Policy" content={csp} />
     )}
     <meta name="color-scheme" content="light" data-color-scheme-meta />
-    <meta name="theme-color" content="#eef6fb" data-theme-color-meta />
+    <meta name="theme-color" content="#ffffff" data-theme-color-meta />
     <meta name="description" content={description} />
     <meta name="author" content="Adi" />
     <link rel="canonical" href={canonicalUrl} />
@@ -69,8 +69,8 @@ const csp = [
     <title>{title}</title>
     <script is:inline>
       (() => {
-        const lightThemeColor = "#eef6fb";
-        const darkThemeColor = "#0d1117";
+        const lightThemeColor = "#ffffff";
+        const darkThemeColor = "#08111f";
 
         const getStoredTheme = () => {
           try {
@@ -107,7 +107,6 @@ const csp = [
       <nav class="site-nav" aria-label="Main navigation">
         <a class="site-title" href={base}>
           <span>Adi</span>
-          <span>Cybersecurity &amp; DevOps</span>
         </a>
         <div class="site-nav-actions">
           <div class="nav-links">
@@ -146,8 +145,8 @@ const csp = [
         const state = document.querySelector("[data-theme-toggle-state]");
         const colorSchemeMeta = document.querySelector("[data-color-scheme-meta]");
         const themeColorMeta = document.querySelector("[data-theme-color-meta]");
-        const lightThemeColor = "#eef6fb";
-        const darkThemeColor = "#0d1117";
+        const lightThemeColor = "#ffffff";
+        const darkThemeColor = "#08111f";
         if (!button) return;
 
         const applyTheme = (theme) => {

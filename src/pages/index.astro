@@ -24,21 +24,13 @@ const base = import.meta.env.BASE_URL.endsWith("/")
   title="Adi · Cybersecurity & DevOps"
   description="Cybersecurity, DevOps, cloud security, and infrastructure notes by Adi."
 >
-  <section class="home-about" aria-label="About me">
+  <section class="home-about" aria-label="Site introduction">
     <div>
-      <p class="eyebrow">About me</p>
-      <h2>Hi, I’m Adi.</h2>
-    </div>
-    <div>
+      <h1>Cybersecurity and DevOps</h1>
       <p>
-        I’m a Cybersecurity and DevSecOps engineer in Singapore. By day I keep
-        cloud platforms and production systems safe; here I write down what I
-        learn along the way — security concepts, architecture patterns, and
-        hard-won lessons, explained the way I’d explain them to a colleague.
+        Practical notes on cloud security, DevSecOps, infrastructure,
+        networking, and production systems.
       </p>
-      <a href={`${base}about/`}>
-        More about me
-      </a>
     </div>
   </section>
 
@@ -47,7 +39,7 @@ const base = import.meta.env.BASE_URL.endsWith("/")
       <section class="tag-browser" aria-label="Browse by tag">
         <div class="section-heading home-section-heading">
           <h2>Top tags</h2>
-          <p>Most used</p>
+          <a href={`${base}tags/`}>All tags</a>
         </div>
         <ul>
           {topTags.map(([tag, count]) => (
