@@ -78,42 +78,65 @@ function rawUrl(source, filePath) {
   return `https://raw.githubusercontent.com/${source.repo}/${source.branch}/${filePath}`;
 }
 
-async function latestLocalCommitDate(localRoot, filePath) {
+async function firstLocalCommitDate(localRoot, filePath) {
   try {
+    // --follow tracks the file across renames so the first publish date is
+    // preserved even if the source file was later moved. git lists commits
+    // newest-first, so the last line is the oldest (first) commit.
     const { stdout } = await execFileAsync(
       "git",
-      ["-C", localRoot, "log", "-1", "--format=%cI", "--", filePath],
+      ["-C", localRoot, "log", "--follow", "--format=%cI", "--", filePath],
       { timeout: 10000 }
     );
-    return stdout.trim() || null;
+    const dates = stdout.trim().split("\n").filter(Boolean);
+    return dates[dates.length - 1] ?? null;
   } catch {
     return null;
   }
 }
 
-async function latestRemoteCommitDate(source, filePath) {
+async function firstRemoteCommitDate(source, filePath) {
   const url = new URL(`https://api.github.com/repos/${source.repo}/commits`);
   url.searchParams.set("sha", source.branch);
   url.searchParams.set("path", filePath);
   url.searchParams.set("per_page", "1");
 
   try {
-    const commits = await fetchJson(url.toString());
-    return commits?.[0]?.commit?.committer?.date ?? null;
+    const response = await fetch(url.toString(), { headers: githubHeaders() });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch ${url}: ${response.status} ${response.statusText}`
+      );
+    }
+
+    // The commits API returns newest-first. With per_page=1 the "last" page in
+    // the Link header holds the file's first (oldest) commit; if there is no
+    // Link header there is only one commit, which is also the first.
+    const link = response.headers.get("link");
+    const lastPage = link?.match(/<([^>]+)>;\s*rel="last"/);
+
+    if (lastPage) {
+      const commits = await fetchJson(lastPage[1]);
+      return commits?.[commits.length - 1]?.commit?.committer?.date ?? null;
+    }
+
+    const commits = await response.json();
+    return commits?.[commits.length - 1]?.commit?.committer?.date ?? null;
   } catch {
     return null;
   }
 }
 
-async function latestCommitDate(source, filePath, localRoot, hasLocalRoot) {
+async function firstCommitDate(source, filePath, localRoot, hasLocalRoot) {
   if (hasLocalRoot && localRoot) {
-    const localDate = await latestLocalCommitDate(localRoot, filePath);
+    const localDate = await firstLocalCommitDate(localRoot, filePath);
     if (localDate) {
       return localDate;
     }
   }
 
-  return latestRemoteCommitDate(source, filePath);
+  return firstRemoteCommitDate(source, filePath);
 }
 
 async function pathExists(filePath) {
@@ -229,7 +252,7 @@ async function discoverPosts(source) {
       description: required(blog.description, "blog.description", filePath),
       image: blog.image,
       date:
-        (await latestCommitDate(source, filePath, localRoot, hasLocalRoot)) ??
+        (await firstCommitDate(source, filePath, localRoot, hasLocalRoot)) ??
         required(blog.date, "blog.date", filePath),
       tags: blog.tags ?? [],
       source: rawUrl(source, filePath),
