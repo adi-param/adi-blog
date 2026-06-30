@@ -1,5 +1,7 @@
 ---
+import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import profile from "../assets/profile.jpg";
 ---
 
 <BaseLayout
@@ -52,6 +54,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </div>
 
     <aside class="about-card" aria-label="Profile links">
+      <Image
+        class="about-photo"
+        src={profile}
+        alt="Adi"
+        widths={[280, 560]}
+        sizes="(max-width: 900px) 100vw, 280px"
+      />
       <h2>Profile</h2>
       <p>Adi</p>
       <dl>

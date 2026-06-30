@@ -576,7 +576,7 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
 }
 
 .about-main {
-  padding-top: 32px;
+  padding-top: 0;
 }
 
 .about-main h2,
@@ -596,10 +596,20 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
 
 .about-card {
   align-self: start;
-  margin-top: 32px;
+  margin-top: 0;
   padding: 20px;
   background: var(--surface-tint);
   border-radius: 8px;
+}
+
+.about-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 18px;
 }
 
 .about-card a {
