@@ -333,6 +333,76 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   border-bottom: 0;
 }
 
+/* Home: wide blog column with a narrow Foundations sidebar */
+.home-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 48px;
+  align-items: start;
+}
+
+.home-side {
+  position: sticky;
+  top: 24px;
+}
+
+.home-side-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--link);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.home-side-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 820px) {
+  .home-columns {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .home-side {
+    position: static;
+  }
+}
+
+/* Compact topic list (thumbnail + name), used in the sidebar */
+.foundation-grid.is-compact {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 0;
+}
+
+.is-compact .foundation-card {
+  grid-template-rows: none;
+  grid-template-columns: 46px 1fr;
+  align-items: center;
+  border-radius: 10px;
+}
+
+.is-compact .foundation-card-media {
+  aspect-ratio: 1 / 1;
+  height: 100%;
+  min-height: 46px;
+}
+
+.is-compact .foundation-card-body {
+  padding: 8px 12px;
+  gap: 0;
+}
+
+.is-compact .foundation-card h2 {
+  font-size: 0.98rem;
+  line-height: 1.2;
+}
+
+.is-compact .foundation-card p,
+.is-compact .foundation-card span {
+  display: none;
+}
+
 .post-list {
   display: grid;
   padding-bottom: 72px;

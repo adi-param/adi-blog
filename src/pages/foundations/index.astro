@@ -1,29 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { foundationTopics } from "../../data/foundationTopics";
-
-const foundationEntries = Object.values(
-  import.meta.glob("../../generated/foundations/*.md", { eager: true })
-);
-const topics = [
-  ...foundationEntries.reduce<Map<string, { title: string; count: number }>>(
-    (items, entry) => {
-      const current = items.get(entry.frontmatter.topicSlug);
-      items.set(entry.frontmatter.topicSlug, {
-        title: entry.frontmatter.topic,
-        count: (current?.count ?? 0) + 1,
-      });
-      return items;
-    },
-    new Map()
-  ),
-]
-  .map(([slug, topic]) => ({ slug, ...topic, ...foundationTopics[slug] }))
-  .sort((a, b) => a.title.localeCompare(b.title));
-
-const base = import.meta.env.BASE_URL.endsWith("/")
-  ? import.meta.env.BASE_URL
-  : `${import.meta.env.BASE_URL}/`;
+import FoundationTopicGrid from "../../components/FoundationTopicGrid.astro";
 ---
 
 <BaseLayout
@@ -35,35 +12,7 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     <h1>Foundations</h1>
   </section>
 
-  <section class="foundation-grid" aria-label="Foundation sections">
-    {
-      topics.map((topic) => (
-        <article class="foundation-card">
-          <a
-            class="foundation-card-media"
-            href={`${base}foundations/${topic.slug}/`}
-            aria-label={topic.title}
-          >
-            {topic.image ? (
-              <img src={`${base}${topic.image}`} alt="" loading="lazy" />
-            ) : (
-              <span class="foundation-card-fallback" aria-hidden="true">
-                {topic.title.charAt(0)}
-              </span>
-            )}
-          </a>
-          <div class="foundation-card-body">
-            <h2>
-              <a href={`${base}foundations/${topic.slug}/`}>{topic.title}</a>
-            </h2>
-            {topic.tagline && <p>{topic.tagline}</p>}
-            <span>
-              {topic.count} entr{topic.count === 1 ? "y" : "ies"}
-            </span>
-          </div>
-        </article>
-      ))
-    }
-    {topics.length === 0 && <p class="empty-state">Foundation sections will appear here as they are published.</p>}
+  <section aria-label="Foundation sections">
+    <FoundationTopicGrid />
   </section>
 </BaseLayout>

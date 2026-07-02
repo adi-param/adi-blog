@@ -3,7 +3,7 @@ title: Forward Proxy and Reverse Proxy
 description: >-
   A practical explanation of proxies, forward proxies, reverse proxies, VPNs,
   load balancers, and ingress controllers.
-date: '2026-07-02T08:52:10.807Z'
+date: '2026-06-27T13:55:20+08:00'
 topic: Networking
 topicSlug: networking
 entrySlug: proxies

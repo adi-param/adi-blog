@@ -3,7 +3,7 @@ title: 'Session, Presentation, and Application (Layers 5 to 7)'
 description: >-
   A beginner friendly explanation of the top of the network stack, where
   conversations, encryption, and everyday protocols like DNS and HTTP live.
-date: '2026-07-02T08:52:10.710Z'
+date: '2026-07-02T17:03:15+08:00'
 topic: Networking
 topicSlug: networking
 entrySlug: application-layer
@@ -18,6 +18,8 @@ sourceUrl: >-
 The lower four layers exist to get your data reliably from one program to another. The top three layers are where that data finally becomes something meaningful: an ongoing conversation, information in a format both sides understand, and the well known services you use every day like websites and email. These are the top layers of the [OSI model](/foundations/networking/osi-model/).
 
 In real systems these three layers blend together, and the everyday internet model (called TCP/IP) actually treats them as one big "Application" layer. We group them in a single post here for the same reason. All three work with plain **data**, without the special packaging names used lower down.
+
+![Session, Presentation, and Application layers showing DNS, TLS, HTTP, APIs, certificates, and sessions at the top of the OSI model](https://raw.githubusercontent.com/adi-param/networking-wiki/main/docs/concepts/assets/application-layer-hero.png)
 
 ## What these three layers do
 

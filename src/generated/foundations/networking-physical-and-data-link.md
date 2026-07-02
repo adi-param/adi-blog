@@ -3,7 +3,7 @@ title: Physical and Data Link (Layers 1 and 2)
 description: >-
   A beginner friendly explanation of how raw signals travel over a cable and how
   devices on the same local network find each other.
-date: '2026-07-02T08:52:10.780Z'
+date: '2026-07-02T17:03:15+08:00'
 topic: Networking
 topicSlug: networking
 entrySlug: physical-and-data-link
@@ -20,6 +20,8 @@ Imagine two laptops plugged into the same box in an office wall. Before any webs
 Those are the jobs of the bottom two layers of the [OSI model](/foundations/networking/osi-model/). Together they answer one simple question: can two devices on the same local network physically send data to each other? Everything higher up assumes the answer is already yes.
 
 Before we start, one word you will see often. A **protocol** is just an agreed set of rules that two devices both follow so they can understand each other, the same way two people need a shared language to talk.
+
+![Physical and Data Link layers showing bits becoming signals, frames carrying MAC addresses, and a switch delivering data on a local network](https://raw.githubusercontent.com/adi-param/networking-wiki/main/docs/concepts/assets/physical-and-data-link-hero.png)
 
 ## What these two layers do
 

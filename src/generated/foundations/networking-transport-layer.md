@@ -3,7 +3,7 @@ title: The Transport Layer (Layer 4)
 description: >-
   A beginner friendly explanation of how data reaches the correct program on a
   machine, and the difference between TCP and UDP.
-date: '2026-07-02T08:52:10.831Z'
+date: '2026-07-02T17:03:15+08:00'
 topic: Networking
 topicSlug: networking
 entrySlug: transport-layer
@@ -18,6 +18,8 @@ sourceUrl: >-
 Layer 3 gets your data to the correct machine. But a single machine runs many programs at the same time: a web browser, a music app, a file download, and more. When data arrives, the computer needs to know which of those programs it belongs to. Sorting incoming data into the correct program, and deciding how carefully to deliver it, is the job of Layer 4 of the [OSI model](/foundations/networking/osi-model/).
 
 Layer 4 answers: can the data reach the correct program on the other machine, and how reliable does that delivery need to be?
+
+![Transport layer showing ports delivering data to the correct program, with TCP reliability and UDP fast delivery](https://raw.githubusercontent.com/adi-param/networking-wiki/main/docs/concepts/assets/transport-layer-hero.png)
 
 ## What this layer does
 

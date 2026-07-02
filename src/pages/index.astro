@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostList from "../components/PostList.astro";
+import FoundationTopicGrid from "../components/FoundationTopicGrid.astro";
 
 const posts = (await getCollection("posts")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
@@ -26,11 +27,21 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     </div>
   </section>
 
-  <section class="post-list" aria-label="Recent posts">
-    <div class="section-heading home-section-heading">
-      <h2>Latest posts</h2>
-      <a href={`${base}posts/`}>View posts</a>
-    </div>
-    <PostList posts={recentPosts} emptyMessage="Posts will appear here as they are published." />
-  </section>
+  <div class="home-columns">
+    <section class="post-list" aria-label="Recent posts">
+      <div class="section-heading home-section-heading">
+        <h2>Latest posts</h2>
+        <a href={`${base}posts/`}>View posts</a>
+      </div>
+      <PostList posts={recentPosts} emptyMessage="Posts will appear here as they are published." />
+    </section>
+
+    <aside class="home-side" aria-label="Foundations">
+      <div class="section-heading home-section-heading">
+        <h2>Foundations</h2>
+      </div>
+      <FoundationTopicGrid compact limit={6} />
+      <a class="home-side-link" href={`${base}foundations/`}>Explore all →</a>
+    </aside>
+  </div>
 </BaseLayout>

@@ -3,7 +3,7 @@ title: The Network Layer (Layer 3)
 description: >-
   A beginner friendly explanation of how data finds its way between different
   networks, covering IP addresses, subnets, routing, and NAT.
-date: '2026-07-02T08:52:10.740Z'
+date: '2026-07-02T17:03:15+08:00'
 topic: Networking
 topicSlug: networking
 entrySlug: network-layer
@@ -18,6 +18,8 @@ sourceUrl: >-
 The layers below this one can only deliver data to a device on the same local network, like two computers plugged into the same office switch. But most of the time you want to reach a machine on a completely different network, such as a website hosted in another country. Getting data from one network to another is the job of Layer 3 of the [OSI model](/foundations/networking/osi-model/).
 
 Layer 3 answers one question: can this data reach the correct network, wherever it is in the world? This is where a lot of the ideas people think of as "how the internet works" actually live, so we will take it slowly.
+
+![Network layer showing packets moving from a local network through a default gateway and routers to a remote network](https://raw.githubusercontent.com/adi-param/networking-wiki/main/docs/concepts/assets/network-layer-hero.png)
 
 ## What this layer does
 
