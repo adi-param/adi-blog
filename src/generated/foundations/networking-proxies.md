@@ -43,6 +43,8 @@ The two most common patterns are:
 
 The confusing part is that both are "just proxies." The difference is which side they are helping.
 
+![Forward and reverse proxies shown as middle systems, where a forward proxy represents clients and a reverse proxy represents servers](https://raw.githubusercontent.com/adi-param/networking-wiki/main/docs/concepts/assets/proxies-hero.png)
+
 ## Forward Proxy
 
 Imagine you are inside a company network and your laptop wants to open a website.
