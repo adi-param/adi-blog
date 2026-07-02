@@ -1,44 +1,93 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PostList from "../../components/PostList.astro";
 
 export async function getStaticPaths() {
   const foundationEntries = Object.values(
     import.meta.glob("../../generated/foundations/*.md", { eager: true })
   );
-  const topics = [
-    ...foundationEntries.reduce<Map<string, string>>((items, entry) => {
-      items.set(entry.frontmatter.topicSlug, entry.frontmatter.topic);
-      return items;
-    }, new Map()),
-  ].map(([slug, title]) => ({ slug, title }));
 
-  return topics.map((topic) => ({
-    params: { topic: topic.slug },
-    props: {
-      topic,
-      entries: foundationEntries
-        .filter((entry) => entry.frontmatter.topicSlug === topic.slug)
-        .sort(
-          (a, b) =>
-            new Date(b.frontmatter.date).valueOf() -
-            new Date(a.frontmatter.date).valueOf()
-        ),
-    },
-  }));
+  const topicsMap = new Map<string, string>();
+  for (const entry of foundationEntries) {
+    topicsMap.set(entry.frontmatter.topicSlug, entry.frontmatter.topic);
+  }
+
+  return [...topicsMap].map(([slug, title]) => {
+    const items = foundationEntries
+      .filter((entry) => entry.frontmatter.topicSlug === slug)
+      .map((entry) => ({
+        slug: entry.frontmatter.entrySlug,
+        title: entry.frontmatter.title,
+        description: entry.frontmatter.description,
+        order:
+          typeof entry.frontmatter.order === "number"
+            ? entry.frontmatter.order
+            : null,
+        group:
+          typeof entry.frontmatter.group === "string"
+            ? entry.frontmatter.group
+            : null,
+        date: entry.frontmatter.date,
+        isStart: false,
+        step: null as number | null,
+      }));
+
+    const hasStructure = items.some(
+      (item) => item.group !== null || item.order !== null
+    );
+
+    // Bucket every entry by its group heading. Entries with no group fall into
+    // a trailing catch-all.
+    const buckets = new Map<string, typeof items>();
+    for (const item of items) {
+      const name = item.group ?? (hasStructure ? "More" : "Notes");
+      if (!buckets.has(name)) buckets.set(name, []);
+      buckets.get(name)!.push(item);
+    }
+
+    const minOrder = (entries: typeof items) =>
+      entries.reduce(
+        (min, e) => (e.order !== null ? Math.min(min, e.order) : min),
+        Infinity
+      );
+
+    const groups = [...buckets.entries()]
+      .map(([name, entries], index) => {
+        // A post with an order joins the connected path (order 0 is the entry
+        // point, order > 0 are numbered steps). A post without an order renders
+        // as an individual card. A group may hold both.
+        const path = entries
+          .filter((e) => e.order !== null)
+          .sort((a, b) => (a.order as number) - (b.order as number));
+        let step = 0;
+        for (const entry of path) {
+          if (entry.order === 0) entry.isStart = true;
+          else entry.step = ++step;
+        }
+        const cards = entries
+          .filter((e) => e.order === null)
+          .sort(
+            (a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf()
+          );
+        return { name, path, cards, rank: minOrder(entries), index };
+      })
+      // Ordered paths first (by their order), collections after; stable on ties.
+      .sort((a, b) => a.rank - b.rank || a.index - b.index);
+
+    return {
+      params: { topic: slug },
+      props: { topic: { slug, title }, groups, total: items.length },
+    };
+  });
 }
 
-const { topic, entries } = Astro.props;
+const { topic, groups, total } = Astro.props;
+const base = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+const href = (slug: string) => `${base}foundations/${topic.slug}/${slug}/`;
 const description =
-  entries[0]?.frontmatter.description ?? `${topic.title} reference notes.`;
-const entryLinks = entries.map((entry) => ({
-  slug: entry.frontmatter.entrySlug,
-  data: {
-    title: entry.frontmatter.title,
-    description: entry.frontmatter.description,
-    date: new Date(entry.frontmatter.date),
-  },
-}));
+  (groups[0]?.path[0] ?? groups[0]?.cards[0])?.description ??
+  `${topic.title} reference notes.`;
 ---
 
 <BaseLayout title={`${topic.title} | Adi`} description={description}>
@@ -47,17 +96,50 @@ const entryLinks = entries.map((entry) => ({
     <h1>{topic.title}</h1>
   </section>
 
-  <section class="post-list" aria-label={`${topic.title} entries`}>
-    <div class="section-heading">
-      <h2>Topics</h2>
-      <p>{entries.length} topic{entries.length === 1 ? "" : "s"}</p>
-    </div>
-    <PostList
-      posts={entryLinks}
-      basePath={`foundations/${topic.slug}`}
-      showTags={false}
-      showDate={false}
-      emptyMessage="Reference notes will appear here as they are published from the source repo."
-    />
-  </section>
+  {
+    groups.map((group) => (
+      <section class="series-group" aria-label={group.name}>
+        <h2 class="series-heading">{group.name}</h2>
+
+        {group.path.length > 0 && (
+          <ol class="path-list">
+            {group.path.map((item) => (
+              <li class:list={["path-item", item.isStart && "path-item-start"]}>
+                <span class="path-node" aria-hidden="true">
+                  {item.isStart ? "▸" : item.step}
+                </span>
+                <a class="path-card" href={href(item.slug)}>
+                  {item.isStart && <span class="path-kicker">Start here</span>}
+                  <span class="series-title">{item.title}</span>
+                  <span class="series-desc">{item.description}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {group.cards.length > 0 && (
+          <ul class="series-list">
+            {group.cards.map((item) => (
+              <li class="series-item">
+                <a href={href(item.slug)}>
+                  <span class="series-title">{item.title}</span>
+                  <span class="series-desc">{item.description}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ))
+  }
+
+  {
+    total === 0 && (
+      <p class="empty-state">
+        Reference notes will appear here as they are published from the source
+        repo.
+      </p>
+    )
+  }
 </BaseLayout>

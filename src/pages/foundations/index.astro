@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { foundationTopics } from "../../data/foundationTopics";
 
 const foundationEntries = Object.values(
   import.meta.glob("../../generated/foundations/*.md", { eager: true })
@@ -17,7 +18,7 @@ const topics = [
     new Map()
   ),
 ]
-  .map(([slug, topic]) => ({ slug, ...topic }))
+  .map(([slug, topic]) => ({ slug, ...topic, ...foundationTopics[slug] }))
   .sort((a, b) => a.title.localeCompare(b.title));
 
 const base = import.meta.env.BASE_URL.endsWith("/")
@@ -38,10 +39,28 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     {
       topics.map((topic) => (
         <article class="foundation-card">
-          <h2>
-            <a href={`${base}foundations/${topic.slug}/`}>{topic.title}</a>
-          </h2>
-          <span>{topic.count} topic{topic.count === 1 ? "" : "s"}</span>
+          <a
+            class="foundation-card-media"
+            href={`${base}foundations/${topic.slug}/`}
+            aria-label={topic.title}
+          >
+            {topic.image ? (
+              <img src={`${base}${topic.image}`} alt="" loading="lazy" />
+            ) : (
+              <span class="foundation-card-fallback" aria-hidden="true">
+                {topic.title.charAt(0)}
+              </span>
+            )}
+          </a>
+          <div class="foundation-card-body">
+            <h2>
+              <a href={`${base}foundations/${topic.slug}/`}>{topic.title}</a>
+            </h2>
+            {topic.tagline && <p>{topic.tagline}</p>}
+            <span>
+              {topic.count} entr{topic.count === 1 ? "y" : "ies"}
+            </span>
+          </div>
         </article>
       ))
     }

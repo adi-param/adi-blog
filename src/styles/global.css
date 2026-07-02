@@ -579,23 +579,62 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
 
 .foundation-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
   padding: 0 0 84px;
 }
 
 .foundation-card {
   display: grid;
-  gap: 12px;
+  grid-template-rows: auto 1fr;
   align-content: start;
-  padding: 20px;
+  overflow: hidden;
   background: var(--surface);
-  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.foundation-card:hover {
+  border-color: var(--link);
+  transform: translateY(-2px);
+}
+
+.foundation-card-media {
+  display: block;
+  aspect-ratio: 16 / 7;
+  background: var(--surface-soft);
+  overflow: hidden;
+}
+
+.foundation-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.foundation-card-fallback {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--surface-soft), var(--surface-blue));
+  color: var(--accent);
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+.foundation-card-body {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 18px 20px 20px;
 }
 
 .foundation-card h2 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   line-height: 1.25;
 }
 
@@ -624,6 +663,142 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
 .foundation-card span {
   color: var(--subtle);
   font-size: 0.9rem;
+}
+
+/* Foundation topic page: numbered learning path */
+.series-group {
+  padding: 0 0 40px;
+}
+
+.series-heading {
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.series-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.series-item {
+  margin: 0;
+}
+
+.series-item > a {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  padding: 18px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.series-item > a:hover {
+  border-color: var(--link);
+  transform: translateY(-1px);
+}
+
+.series-title {
+  font-size: 1.2rem;
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.series-desc {
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* A sequence renders as a connected path: numbered nodes joined by a spine, so
+   the entry point and the steps read as one journey. */
+.path-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.path-item {
+  position: relative;
+  margin: 0;
+  padding-left: 66px;
+}
+
+/* the connecting spine, drawn from each node down to the next */
+.path-item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 31px;
+  top: 18px;
+  width: 2px;
+  height: calc(100% + 16px);
+  background: color-mix(in srgb, var(--accent), transparent 55%);
+}
+
+.path-node {
+  position: absolute;
+  left: 14px;
+  top: 18px;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 0 0 4px var(--bg);
+}
+
+.path-card {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  padding: 18px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.path-card:hover {
+  border-color: var(--link);
+  transform: translateY(-1px);
+}
+
+/* the entry point: filled node, tinted card, and a kicker label */
+.path-item-start .path-node {
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 1.15rem;
+}
+
+.path-item-start .path-card {
+  border-color: color-mix(in srgb, var(--accent), transparent 45%);
+  background: color-mix(in srgb, var(--surface-soft), transparent 25%);
+}
+
+.path-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
 .foundation-page {

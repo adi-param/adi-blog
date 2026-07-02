@@ -60,6 +60,11 @@ function serializeFoundationFrontmatter(entry) {
     topic: required(entry.topic, "topic", entry.slug),
     topicSlug: required(entry.topicSlug, "topicSlug", entry.slug),
     entrySlug: required(entry.slug, "entrySlug", entry.slug),
+    // Optional explicit ordering for a topic that reads as a sequence. Absent
+    // for standalone notes, which the site groups separately and sorts by date.
+    ...(Number.isFinite(entry.order) ? { order: entry.order } : {}),
+    // Optional section heading used to group entries within a topic.
+    ...(entry.group ? { group: entry.group } : {}),
     source: required(entry.source, "source", entry.slug),
     sourceUrl: entry.sourceUrl ?? entry.source,
   });
@@ -188,6 +193,54 @@ async function walkFiles(dir, rootDir = dir) {
 
 function stripLeadingH1(markdown) {
   return markdown.replace(/^# .+\n+/, "");
+}
+
+// Maps each source file to the route it publishes at, so cross references
+// between source files can be turned into working site links.
+function buildUrlMap(posts, foundationEntries) {
+  const map = new Map();
+  for (const post of posts) {
+    map.set(`${post.sourceName}::${post.filePath}`, `/posts/${post.slug}/`);
+  }
+  for (const entry of foundationEntries) {
+    map.set(
+      `${entry.sourceName}::${entry.filePath}`,
+      `/foundations/${entry.topicSlug}/${entry.slug}/`
+    );
+  }
+  return map;
+}
+
+// Rewrites relative links to sibling markdown files (which work when the wiki is
+// browsed on GitHub) into the site routes those files publish to. Links to
+// unpublished files, external URLs, and anchors are left untouched. Assumes the
+// site is served from the root (astro base "/").
+function rewriteMarkdownLinks(markdown, filePath, sourceName, urlMap) {
+  const dir = path.posix.dirname(filePath);
+
+  return markdown.replace(
+    /\]\(([^)\s]+)(\s+"[^"]*")?\)/g,
+    (match, target, title = "") => {
+      if (/^(https?:|mailto:|#|\/)/i.test(target)) {
+        return match;
+      }
+
+      const [rawPath, anchor] = target.split("#");
+
+      if (!rawPath.endsWith(".md")) {
+        return match;
+      }
+
+      const resolved = path.posix.normalize(path.posix.join(dir, rawPath));
+      const url = urlMap.get(`${sourceName}::${resolved}`);
+
+      if (!url) {
+        return match;
+      }
+
+      return `](${url}${anchor ? `#${anchor}` : ""}${title})`;
+    }
+  );
 }
 
 function titleFromMarkdown(markdown, fallback) {
@@ -346,6 +399,8 @@ async function discoverPosts(source) {
       tags: blog.tags ?? [],
       source: rawUrl(source, filePath),
       sourceUrl: sourceUrl(source, filePath),
+      filePath,
+      sourceName: source.name,
       content: parsed.content,
     });
   }
@@ -409,8 +464,12 @@ async function discoverFoundationEntries(source) {
         new Date().toISOString(),
       topic,
       topicSlug: normalizedTopicSlug,
+      order: Number.isFinite(foundation?.order) ? foundation.order : undefined,
+      group: typeof foundation?.group === "string" ? foundation.group : undefined,
       source: rawUrl(source, filePath),
       sourceUrl: sourceUrl(source, filePath),
+      filePath,
+      sourceName: source.name,
       content: parsed.content,
     });
   }
@@ -441,11 +500,18 @@ async function main() {
   await clearMarkdownFiles(postsOutputDir);
   await clearMarkdownFiles(foundationOutputDir);
 
+  const urlMap = buildUrlMap(posts, foundationEntries);
+
   for (const post of posts) {
     required(post.slug, "slug");
 
     const frontmatter = serializeFrontmatter(post);
-    const content = stripLeadingH1(post.content.trim());
+    const content = rewriteMarkdownLinks(
+      stripLeadingH1(post.content.trim()),
+      post.filePath,
+      post.sourceName,
+      urlMap
+    );
     const outputPath = path.join(postsOutputDir, `${post.slug}.md`);
 
     await fs.writeFile(outputPath, `${frontmatter.trim()}\n\n${content}\n`);
@@ -456,7 +522,12 @@ async function main() {
     required(entry.slug, "slug");
 
     const frontmatter = serializeFoundationFrontmatter(entry);
-    const content = stripLeadingH1(entry.content.trim());
+    const content = rewriteMarkdownLinks(
+      stripLeadingH1(entry.content.trim()),
+      entry.filePath,
+      entry.sourceName,
+      urlMap
+    );
     const outputPath = path.join(foundationOutputDir, `${entry.topicSlug}-${entry.slug}.md`);
 
     await fs.writeFile(outputPath, `${frontmatter.trim()}\n\n${content}\n`);
