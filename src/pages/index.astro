@@ -6,15 +6,7 @@ import PostList from "../components/PostList.astro";
 const posts = (await getCollection("posts")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
-const tagCounts = posts.reduce<Map<string, number>>((counts, post) => {
-  post.data.tags.forEach((tag) => {
-    counts.set(tag, (counts.get(tag) ?? 0) + 1);
-  });
-  return counts;
-}, new Map());
-const topTags = [...tagCounts.entries()]
-  .sort(([tagA, countA], [tagB, countB]) => countB - countA || tagA.localeCompare(tagB))
-  .slice(0, 8);
+const recentPosts = posts.slice(0, 10);
 const base = import.meta.env.BASE_URL.endsWith("/")
   ? import.meta.env.BASE_URL
   : `${import.meta.env.BASE_URL}/`;
@@ -34,32 +26,11 @@ const base = import.meta.env.BASE_URL.endsWith("/")
     </div>
   </section>
 
-  {
-    topTags.length > 0 && (
-      <section class="tag-browser" aria-label="Browse by tag">
-        <div class="section-heading home-section-heading">
-          <h2>Top tags</h2>
-          <a href={`${base}tags/`}>All tags</a>
-        </div>
-        <ul>
-          {topTags.map(([tag, count]) => (
-            <li>
-              <a href={`${base}tags/${tag}/`}>
-                {tag}
-                <span>{count}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  <section class="post-list" aria-label="All posts">
+  <section class="post-list" aria-label="Recent posts">
     <div class="section-heading home-section-heading">
-      <h2>All posts</h2>
-      <p>{posts.length} post{posts.length === 1 ? "" : "s"}</p>
+      <h2>Latest posts</h2>
+      <a href={`${base}archive/`}>View archive</a>
     </div>
-    <PostList posts={posts} emptyMessage="Posts will appear here as they are published." />
+    <PostList posts={recentPosts} emptyMessage="Posts will appear here as they are published." />
   </section>
 </BaseLayout>

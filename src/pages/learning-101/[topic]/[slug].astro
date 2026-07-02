@@ -1,0 +1,56 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const entries = Object.values(
+    import.meta.glob("../../../generated/learning/*.md", { eager: true })
+  );
+
+  return entries.map((entry) => ({
+    params: {
+      topic: entry.frontmatter.topicSlug,
+      slug: entry.frontmatter.entrySlug,
+    },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings = [] } = entry;
+const base = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+const tableOfContents = headings.filter((heading) => heading.depth === 2);
+---
+
+<BaseLayout title={`${entry.frontmatter.title} | Adi`} description={entry.frontmatter.description}>
+  <article class="learning-page">
+    <header class="post-header">
+      <a class="back-link" href={`${base}learning-101/${entry.frontmatter.topicSlug}/`}>
+        Back to {entry.frontmatter.topic}
+      </a>
+      <p class="eyebrow">{entry.frontmatter.topic}</p>
+      <h1>{entry.frontmatter.title}</h1>
+      <p>{entry.frontmatter.description}</p>
+    </header>
+
+    {
+      tableOfContents.length > 2 && (
+        <nav class="post-toc" aria-label="Table of contents">
+          <h2>On this page</h2>
+          <ol>
+            {tableOfContents.map((heading) => (
+              <li>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
+
+    <div class="content learning-content">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

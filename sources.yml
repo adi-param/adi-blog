@@ -3,6 +3,7 @@ sources:
     repo: adi-param/networking-wiki
     branch: main
     localPath: ../networking-wiki
+    learningTopic: networking
     paths:
       - docs/**/*.md
 
@@ -17,5 +18,13 @@ sources:
     repo: adi-param/aws
     branch: main
     localPath: ../aws
+    learningTopic: aws
+    paths:
+      - docs/**/*.md
+
+  - name: threat-modeling-playbook
+    repo: adi-param/threat-modeling-playbook
+    branch: main
+    localPath: ../threat-modeling-playbook
     paths:
       - docs/**/*.md

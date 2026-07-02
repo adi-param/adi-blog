@@ -1,0 +1,56 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostList from "../components/PostList.astro";
+
+const posts = (await getCollection("posts")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+const tags = [
+  ...posts.reduce<Map<string, number>>((counts, post) => {
+    post.data.tags.forEach((tag) => counts.set(tag, (counts.get(tag) ?? 0) + 1));
+    return counts;
+  }, new Map()),
+].sort(([tagA, countA], [tagB, countB]) => countB - countA || tagA.localeCompare(tagB));
+const topTags = tags.slice(0, 8);
+const base = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+---
+
+<BaseLayout title="Archive | Adi" description="Browse all blog posts by tag and date.">
+  <section class="page-header">
+    <p class="eyebrow">Posts</p>
+    <h1>Archive</h1>
+    <p>All blog posts in reverse chronological order.</p>
+  </section>
+
+  {
+    topTags.length > 0 && (
+      <section class="tag-browser" aria-label="Top tags">
+        <div class="section-heading home-section-heading">
+          <h2>Top tags</h2>
+          <a href={`${base}tags/`}>All tags</a>
+        </div>
+        <ul>
+          {topTags.map(([tag, count]) => (
+            <li>
+              <a href={`${base}tags/${tag}/`}>
+                {tag}
+                <span>{count}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section class="post-list" aria-label="All posts">
+    <div class="section-heading">
+      <h2>All posts</h2>
+      <p>{posts.length} post{posts.length === 1 ? "" : "s"}</p>
+    </div>
+    <PostList posts={posts} emptyMessage="Posts will appear here as they are published." />
+  </section>
+</BaseLayout>

@@ -7,16 +7,25 @@ interface Post {
     image?: string;
     date: Date;
     updated?: Date;
-    tags: string[];
+    tags?: string[];
   };
 }
 
 interface Props {
   posts: Post[];
   emptyMessage: string;
+  basePath?: string;
+  showTags?: boolean;
+  showDate?: boolean;
 }
 
-const { posts, emptyMessage } = Astro.props;
+const {
+  posts,
+  emptyMessage,
+  basePath = "posts",
+  showTags = true,
+  showDate = true,
+} = Astro.props;
 const base = import.meta.env.BASE_URL.endsWith("/")
   ? import.meta.env.BASE_URL
   : `${import.meta.env.BASE_URL}/`;
@@ -24,31 +33,41 @@ const base = import.meta.env.BASE_URL.endsWith("/")
 
 {
   posts.map((post) => (
-    <article class="post-card">
-      <div class="post-meta">
-        <time datetime={post.data.date.toISOString()}>
-          {post.data.date.toLocaleDateString("en", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </time>
-        <ul class="tags" aria-label="Tags">
-          {post.data.tags.map((tag) => (
-            <li>
-              <a href={`${base}tags/${tag}/`}>{tag}</a>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <article
+      class:list={["post-card", !(showDate || (showTags && (post.data.tags ?? []).length > 0)) && "post-card-plain"]}
+      data-tags={(post.data.tags ?? []).join(",")}
+      data-search={`${post.data.title} ${post.data.description} ${(post.data.tags ?? []).join(" ")}`}
+    >
+      {(showDate || (showTags && (post.data.tags ?? []).length > 0)) && (
+        <div class="post-meta">
+          {showDate && (
+            <time datetime={post.data.date.toISOString()}>
+              {post.data.date.toLocaleDateString("en", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </time>
+          )}
+          {showTags && (post.data.tags ?? []).length > 0 && (
+            <ul class="tags" aria-label="Tags">
+              {(post.data.tags ?? []).map((tag) => (
+                <li>
+                  <a href={`${base}tags/${tag}/`}>{tag}</a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       <div class="post-card-body">
         {post.data.image && (
-          <a class="post-card-image" href={`${base}posts/${post.slug}/`} aria-label={post.data.title}>
+          <a class="post-card-image" href={`${base}${basePath}/${post.slug}/`} aria-label={post.data.title}>
             <img src={post.data.image} alt="" loading="lazy" />
           </a>
         )}
         <h3>
-          <a href={`${base}posts/${post.slug}/`}>{post.data.title}</a>
+          <a href={`${base}${basePath}/${post.slug}/`}>{post.data.title}</a>
         </h3>
         <p>{post.data.description}</p>
       </div>

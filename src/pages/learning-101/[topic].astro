@@ -1,0 +1,63 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostList from "../../components/PostList.astro";
+
+export async function getStaticPaths() {
+  const learningEntries = Object.values(
+    import.meta.glob("../../generated/learning/*.md", { eager: true })
+  );
+  const topics = [
+    ...learningEntries.reduce<Map<string, string>>((items, entry) => {
+      items.set(entry.frontmatter.topicSlug, entry.frontmatter.topic);
+      return items;
+    }, new Map()),
+  ].map(([slug, title]) => ({ slug, title }));
+
+  return topics.map((topic) => ({
+    params: { topic: topic.slug },
+    props: {
+      topic,
+      entries: learningEntries
+        .filter((entry) => entry.frontmatter.topicSlug === topic.slug)
+        .sort(
+          (a, b) =>
+            new Date(b.frontmatter.date).valueOf() -
+            new Date(a.frontmatter.date).valueOf()
+        ),
+    },
+  }));
+}
+
+const { topic, entries } = Astro.props;
+const description =
+  entries[0]?.frontmatter.description ?? `${topic.title} reference notes.`;
+const entryLinks = entries.map((entry) => ({
+  slug: entry.frontmatter.entrySlug,
+  data: {
+    title: entry.frontmatter.title,
+    description: entry.frontmatter.description,
+    date: new Date(entry.frontmatter.date),
+  },
+}));
+---
+
+<BaseLayout title={`${topic.title} | Adi`} description={description}>
+  <section class="page-header learning-header">
+    <p class="eyebrow">Learning 101</p>
+    <h1>{topic.title}</h1>
+  </section>
+
+  <section class="post-list" aria-label={`${topic.title} entries`}>
+    <div class="section-heading">
+      <h2>Topics</h2>
+      <p>{entries.length} topic{entries.length === 1 ? "" : "s"}</p>
+    </div>
+    <PostList
+      posts={entryLinks}
+      basePath={`learning-101/${topic.slug}`}
+      showTags={false}
+      showDate={false}
+      emptyMessage="Reference notes will appear here as they are published from the source repo."
+    />
+  </section>
+</BaseLayout>

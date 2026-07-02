@@ -8,7 +8,13 @@ import yaml from "js-yaml";
 
 const root = process.cwd();
 const sourcesPath = path.join(root, "sources.yml");
-const outputDir = path.resolve(root, process.env.POSTS_OUTPUT_DIR ?? "src/content/posts");
+const postsOutputDir = path.resolve(root, process.env.POSTS_OUTPUT_DIR ?? "src/content/posts");
+const learningOutputDir = path.resolve(
+  root,
+  process.env.LEARNING_OUTPUT_DIR ?? "src/generated/learning"
+);
+const legacyLearningOutputDir = path.resolve(root, "src/content/learning");
+const astroDataStorePath = path.join(root, ".astro", "data-store.json");
 const execFileAsync = promisify(execFile);
 
 // gray-matter ships a JavaScript frontmatter engine that calls eval(). Because
@@ -44,6 +50,19 @@ function serializeFrontmatter(post) {
     tags: post.tags ?? [],
     source: required(post.source, "source", post.slug),
     sourceUrl: post.sourceUrl ?? post.source,
+  });
+}
+
+function serializeLearningFrontmatter(entry) {
+  return matter.stringify("", {
+    title: required(entry.title, "title", entry.slug),
+    description: required(entry.description, "description", entry.slug),
+    date: required(entry.date, "date", entry.slug),
+    topic: required(entry.topic, "topic", entry.slug),
+    topicSlug: required(entry.topicSlug, "topicSlug", entry.slug),
+    entrySlug: required(entry.slug, "entrySlug", entry.slug),
+    source: required(entry.source, "source", entry.slug),
+    sourceUrl: entry.sourceUrl ?? entry.source,
   });
 }
 
@@ -172,6 +191,107 @@ function stripLeadingH1(markdown) {
   return markdown.replace(/^# .+\n+/, "");
 }
 
+function titleFromMarkdown(markdown, fallback) {
+  const heading = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim();
+  return heading || fallback;
+}
+
+function descriptionFromMarkdown(markdown, fallback) {
+  const withoutHeading = stripLeadingH1(markdown).trim();
+  const paragraph = withoutHeading
+    .split(/\n\s*\n/)
+    .map((block) => block.replace(/\s+/g, " ").trim())
+    .find((block) => block && !block.startsWith("```") && !block.startsWith("!") && !block.startsWith("|"));
+
+  if (!paragraph) {
+    return fallback;
+  }
+
+  return paragraph.length > 180 ? `${paragraph.slice(0, 177).trim()}...` : paragraph;
+}
+
+function humanizeSlug(value) {
+  return value
+    .replace(/\.md$/i, "")
+    .replace(/\/README$/i, "/overview")
+    .split("/")
+    .filter((part) => part && part !== "docs")
+    .join("-")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function titleFromPath(filePath) {
+  const slug = humanizeSlug(filePath);
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function normalizeTopic(value) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function topicSlug(value) {
+  return normalizeTopic(String(value ?? "").replace(/101$/i, ""));
+}
+
+function learningConfig(data, source) {
+  if (data?.learning && typeof data.learning === "object") {
+    return data.learning;
+  }
+
+  if (data?.learning101) {
+    throw new Error(
+      `The "learning101" frontmatter shorthand is deprecated. Use "learning.publish" and "learning.topic" instead.`
+    );
+  }
+
+  if (data?.publish === true && data?.type === "learning101") {
+    throw new Error(
+      `The top-level "type: learning101" format is deprecated. Use a "learning" frontmatter object instead.`
+    );
+  }
+
+  return null;
+}
+
+async function clearMarkdownFiles(dir) {
+  await fs.mkdir(dir, { recursive: true });
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+
+  await Promise.all(
+    entries
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+      .map((entry) => fs.unlink(path.join(dir, entry.name)))
+  );
+}
+
+async function clearLegacyLearningDir(dir) {
+  if (!(await pathExists(dir))) {
+    return;
+  }
+
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  await Promise.all(
+    entries
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+      .map((entry) => fs.unlink(path.join(dir, entry.name)))
+  );
+
+  const remaining = await fs.readdir(dir);
+  if (remaining.length === 0) {
+    await fs.rmdir(dir);
+  }
+}
+
 async function fetchJson(url) {
   const response = await fetch(url, { headers: githubHeaders() });
 
@@ -264,6 +384,71 @@ async function discoverPosts(source) {
   return posts;
 }
 
+async function discoverLearningEntries(source) {
+  const files = await listMarkdownFiles(source);
+  const entries = [];
+  const localRoot = source.localPath ? path.resolve(root, source.localPath) : null;
+  const hasLocalRoot = localRoot ? await pathExists(localRoot) : false;
+
+  for (const filePath of files) {
+    if (filePath.includes("/_template/")) {
+      continue;
+    }
+
+    const markdown =
+      hasLocalRoot
+        ? await fs.readFile(path.join(localRoot, filePath), "utf8")
+        : await fetchMarkdown(rawUrl(source, filePath));
+    const parsed = matter(markdown, matterOptions);
+
+    if (parsed.data?.blog?.publish) {
+      continue;
+    }
+
+    const learning = learningConfig(parsed.data, source);
+
+    if (!learning || learning.publish === false) {
+      continue;
+    }
+
+    const topic = required(learning.topic, "learning.topic", filePath);
+    const normalizedTopicSlug = topicSlug(topic);
+
+    if (!normalizedTopicSlug) {
+      continue;
+    }
+
+    const slug = learning?.slug ?? humanizeSlug(filePath);
+
+    if (!SLUG_PATTERN.test(slug)) {
+      throw new Error(
+        `Invalid learning slug "${slug}" in ${filePath}: must match ${SLUG_PATTERN}.`
+      );
+    }
+
+    const fallbackTitle = titleFromPath(filePath);
+    const fallbackDescription = `${titleFromMarkdown(parsed.content, fallbackTitle)} reference notes.`;
+
+    entries.push({
+      slug,
+      title: learning?.title ?? titleFromMarkdown(parsed.content, fallbackTitle),
+      description:
+        learning?.description ?? descriptionFromMarkdown(parsed.content, fallbackDescription),
+      date:
+        (await firstCommitDate(source, filePath, localRoot, hasLocalRoot)) ??
+        learning?.date ??
+        new Date().toISOString(),
+      topic,
+      topicSlug: normalizedTopicSlug,
+      source: rawUrl(source, filePath),
+      sourceUrl: sourceUrl(source, filePath),
+      content: parsed.content,
+    });
+  }
+
+  return entries;
+}
+
 async function main() {
   const sourcesText = await fs.readFile(sourcesPath, "utf8");
   const manifest = yaml.load(sourcesText);
@@ -274,28 +459,50 @@ async function main() {
   }
 
   const posts = [];
+  const learningEntries = [];
 
   for (const source of sources) {
     required(source.name, "name");
     required(source.repo, "repo", source.name);
     required(source.branch, "branch", source.name);
     posts.push(...(await discoverPosts(source)));
+    learningEntries.push(...(await discoverLearningEntries(source)));
   }
 
-  await fs.mkdir(outputDir, { recursive: true });
+  await clearMarkdownFiles(postsOutputDir);
+  await clearMarkdownFiles(learningOutputDir);
+  if (learningOutputDir !== legacyLearningOutputDir) {
+    await clearLegacyLearningDir(legacyLearningOutputDir);
+  }
 
   for (const post of posts) {
     required(post.slug, "slug");
 
     const frontmatter = serializeFrontmatter(post);
     const content = stripLeadingH1(post.content.trim());
-    const outputPath = path.join(outputDir, `${post.slug}.md`);
+    const outputPath = path.join(postsOutputDir, `${post.slug}.md`);
 
     await fs.writeFile(outputPath, `${frontmatter.trim()}\n\n${content}\n`);
     console.log(`Synced ${post.slug}`);
   }
 
+  for (const entry of learningEntries) {
+    required(entry.slug, "slug");
+
+    const frontmatter = serializeLearningFrontmatter(entry);
+    const content = stripLeadingH1(entry.content.trim());
+    const outputPath = path.join(learningOutputDir, `${entry.topicSlug}-${entry.slug}.md`);
+
+    await fs.writeFile(outputPath, `${frontmatter.trim()}\n\n${content}\n`);
+    console.log(`Synced learning ${entry.topicSlug}/${entry.slug}`);
+  }
+
+  await fs.rm(astroDataStorePath, { force: true });
+
   console.log(`Synced ${posts.length} published post${posts.length === 1 ? "" : "s"}`);
+  console.log(
+    `Synced ${learningEntries.length} learning note${learningEntries.length === 1 ? "" : "s"}`
+  );
 }
 
 main().catch((error) => {
