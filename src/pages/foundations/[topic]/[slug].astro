@@ -3,7 +3,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 
 export async function getStaticPaths() {
   const entries = Object.values(
-    import.meta.glob("../../../generated/learning/*.md", { eager: true })
+    import.meta.glob("../../../generated/foundations/*.md", { eager: true })
   );
 
   return entries.map((entry) => ({
@@ -24,9 +24,9 @@ const tableOfContents = headings.filter((heading) => heading.depth === 2);
 ---
 
 <BaseLayout title={`${entry.frontmatter.title} | Adi`} description={entry.frontmatter.description}>
-  <article class="learning-page">
+  <article class="foundation-page">
     <header class="post-header">
-      <a class="back-link" href={`${base}learning-101/${entry.frontmatter.topicSlug}/`}>
+      <a class="back-link" href={`${base}foundations/${entry.frontmatter.topicSlug}/`}>
         Back to {entry.frontmatter.topic}
       </a>
       <p class="eyebrow">{entry.frontmatter.topic}</p>
@@ -49,7 +49,7 @@ const tableOfContents = headings.filter((heading) => heading.depth === 2);
       )
     }
 
-    <div class="content learning-content">
+    <div class="content foundation-content">
       <Content />
     </div>
   </article>

@@ -24,18 +24,6 @@ const base = import.meta.env.BASE_URL.endsWith("/")
 const site = Astro.site ?? new URL("https://adi-param.github.io");
 const canonicalUrl = new URL(Astro.url.pathname, site).toString();
 const imageUrl = new URL(image ?? `${base}site-preview.svg`, site).toString();
-const learningEntries = Object.values(
-  import.meta.glob("../generated/learning/*.md", { eager: true })
-);
-const learningTopics = [
-  ...learningEntries.reduce<Map<string, string>>((topics, entry) => {
-    topics.set(entry.frontmatter.topicSlug, entry.frontmatter.topic);
-    return topics;
-  }, new Map()),
-]
-  .map(([slug, title]) => ({ slug, title }))
-  .sort((a, b) => a.title.localeCompare(b.title));
-
 // Emitted only for production builds; the dev server injects its own HMR
 // scripts that a strict policy would block. The theme toggle uses small inline
 // scripts so the selected theme can be applied before the first paint.
@@ -121,21 +109,10 @@ const csp = [
         </a>
         <div class="site-nav-actions">
           <div class="nav-links">
+            <a href={`${base}posts/`}>Posts</a>
+            <a href={`${base}foundations/`}>Foundations</a>
             <a href={`${base}about/`}>About</a>
             <a href="https://github.com/adi-param">GitHub</a>
-            <a href={`${base}archive/`}>Archive</a>
-            {
-              learningTopics.length > 0 && (
-                <details class="nav-dropdown">
-                  <summary>Learning 101</summary>
-                  <div class="nav-dropdown-menu">
-                    {learningTopics.map((topic) => (
-                      <a href={`${base}learning-101/${topic.slug}/`}>{topic.title}</a>
-                    ))}
-                  </div>
-                </details>
-              )
-            }
           </div>
           <button
             class="theme-toggle"

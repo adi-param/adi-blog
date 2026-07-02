@@ -1,0 +1,50 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const foundationEntries = Object.values(
+  import.meta.glob("../../generated/foundations/*.md", { eager: true })
+);
+const topics = [
+  ...foundationEntries.reduce<Map<string, { title: string; count: number }>>(
+    (items, entry) => {
+      const current = items.get(entry.frontmatter.topicSlug);
+      items.set(entry.frontmatter.topicSlug, {
+        title: entry.frontmatter.topic,
+        count: (current?.count ?? 0) + 1,
+      });
+      return items;
+    },
+    new Map()
+  ),
+]
+  .map(([slug, topic]) => ({ slug, ...topic }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+
+const base = import.meta.env.BASE_URL.endsWith("/")
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
+---
+
+<BaseLayout
+  title="Foundations | Adi"
+  description="Structured technical reference notes organized by foundation topic."
+>
+  <section class="page-header foundation-header">
+    <p class="eyebrow">Foundations</p>
+    <h1>Foundations</h1>
+  </section>
+
+  <section class="foundation-grid" aria-label="Foundation sections">
+    {
+      topics.map((topic) => (
+        <article class="foundation-card">
+          <h2>
+            <a href={`${base}foundations/${topic.slug}/`}>{topic.title}</a>
+          </h2>
+          <span>{topic.count} topic{topic.count === 1 ? "" : "s"}</span>
+        </article>
+      ))
+    }
+    {topics.length === 0 && <p class="empty-state">Foundation sections will appear here as they are published.</p>}
+  </section>
+</BaseLayout>

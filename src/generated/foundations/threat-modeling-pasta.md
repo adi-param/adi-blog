@@ -3,8 +3,8 @@ title: PASTA Threat Modeling
 description: >-
   A structured reference for the Process for Attack Simulation and Threat
   Analysis methodology.
-date: '2026-07-02T04:52:03.899Z'
-topic: Threat Modeling 101
+date: '2026-07-02T12:54:03+08:00'
+topic: Threat Modeling
 topicSlug: threat-modeling
 entrySlug: pasta
 source: >-

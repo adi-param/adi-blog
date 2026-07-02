@@ -3,8 +3,8 @@ title: OSI Model
 description: >-
   A practical reference for the seven OSI layers and how they help diagnose
   network behavior.
-date: '2026-07-02T04:52:03.854Z'
-topic: Networking 101
+date: '2026-07-02T12:54:03+08:00'
+topic: Networking
 topicSlug: networking
 entrySlug: concepts-osi-model
 source: >-

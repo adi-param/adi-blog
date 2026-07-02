@@ -9,11 +9,10 @@ import yaml from "js-yaml";
 const root = process.cwd();
 const sourcesPath = path.join(root, "sources.yml");
 const postsOutputDir = path.resolve(root, process.env.POSTS_OUTPUT_DIR ?? "src/content/posts");
-const learningOutputDir = path.resolve(
+const foundationOutputDir = path.resolve(
   root,
-  process.env.LEARNING_OUTPUT_DIR ?? "src/generated/learning"
+  process.env.FOUNDATION_OUTPUT_DIR ?? "src/generated/foundations"
 );
-const legacyLearningOutputDir = path.resolve(root, "src/content/learning");
 const astroDataStorePath = path.join(root, ".astro", "data-store.json");
 const execFileAsync = promisify(execFile);
 
@@ -53,7 +52,7 @@ function serializeFrontmatter(post) {
   });
 }
 
-function serializeLearningFrontmatter(entry) {
+function serializeFoundationFrontmatter(entry) {
   return matter.stringify("", {
     title: required(entry.title, "title", entry.slug),
     description: required(entry.description, "description", entry.slug),
@@ -240,24 +239,12 @@ function normalizeTopic(value) {
 }
 
 function topicSlug(value) {
-  return normalizeTopic(String(value ?? "").replace(/101$/i, ""));
+  return normalizeTopic(value);
 }
 
-function learningConfig(data, source) {
-  if (data?.learning && typeof data.learning === "object") {
-    return data.learning;
-  }
-
-  if (data?.learning101) {
-    throw new Error(
-      `The "learning101" frontmatter shorthand is deprecated. Use "learning.publish" and "learning.topic" instead.`
-    );
-  }
-
-  if (data?.publish === true && data?.type === "learning101") {
-    throw new Error(
-      `The top-level "type: learning101" format is deprecated. Use a "learning" frontmatter object instead.`
-    );
+function foundationConfig(data, source) {
+  if (data?.foundation && typeof data.foundation === "object") {
+    return data.foundation;
   }
 
   return null;
@@ -272,24 +259,6 @@ async function clearMarkdownFiles(dir) {
       .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
       .map((entry) => fs.unlink(path.join(dir, entry.name)))
   );
-}
-
-async function clearLegacyLearningDir(dir) {
-  if (!(await pathExists(dir))) {
-    return;
-  }
-
-  const entries = await fs.readdir(dir, { withFileTypes: true });
-  await Promise.all(
-    entries
-      .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
-      .map((entry) => fs.unlink(path.join(dir, entry.name)))
-  );
-
-  const remaining = await fs.readdir(dir);
-  if (remaining.length === 0) {
-    await fs.rmdir(dir);
-  }
 }
 
 async function fetchJson(url) {
@@ -384,7 +353,7 @@ async function discoverPosts(source) {
   return posts;
 }
 
-async function discoverLearningEntries(source) {
+async function discoverFoundationEntries(source) {
   const files = await listMarkdownFiles(source);
   const entries = [];
   const localRoot = source.localPath ? path.resolve(root, source.localPath) : null;
@@ -405,24 +374,24 @@ async function discoverLearningEntries(source) {
       continue;
     }
 
-    const learning = learningConfig(parsed.data, source);
+    const foundation = foundationConfig(parsed.data, source);
 
-    if (!learning || learning.publish === false) {
+    if (!foundation || foundation.publish === false) {
       continue;
     }
 
-    const topic = required(learning.topic, "learning.topic", filePath);
+    const topic = required(foundation.topic, "foundation.topic", filePath);
     const normalizedTopicSlug = topicSlug(topic);
 
     if (!normalizedTopicSlug) {
       continue;
     }
 
-    const slug = learning?.slug ?? humanizeSlug(filePath);
+    const slug = foundation?.slug ?? humanizeSlug(filePath);
 
     if (!SLUG_PATTERN.test(slug)) {
       throw new Error(
-        `Invalid learning slug "${slug}" in ${filePath}: must match ${SLUG_PATTERN}.`
+        `Invalid foundation slug "${slug}" in ${filePath}: must match ${SLUG_PATTERN}.`
       );
     }
 
@@ -431,12 +400,12 @@ async function discoverLearningEntries(source) {
 
     entries.push({
       slug,
-      title: learning?.title ?? titleFromMarkdown(parsed.content, fallbackTitle),
+      title: foundation?.title ?? titleFromMarkdown(parsed.content, fallbackTitle),
       description:
-        learning?.description ?? descriptionFromMarkdown(parsed.content, fallbackDescription),
+        foundation?.description ?? descriptionFromMarkdown(parsed.content, fallbackDescription),
       date:
         (await firstCommitDate(source, filePath, localRoot, hasLocalRoot)) ??
-        learning?.date ??
+        foundation?.date ??
         new Date().toISOString(),
       topic,
       topicSlug: normalizedTopicSlug,
@@ -459,21 +428,18 @@ async function main() {
   }
 
   const posts = [];
-  const learningEntries = [];
+  const foundationEntries = [];
 
   for (const source of sources) {
     required(source.name, "name");
     required(source.repo, "repo", source.name);
     required(source.branch, "branch", source.name);
     posts.push(...(await discoverPosts(source)));
-    learningEntries.push(...(await discoverLearningEntries(source)));
+    foundationEntries.push(...(await discoverFoundationEntries(source)));
   }
 
   await clearMarkdownFiles(postsOutputDir);
-  await clearMarkdownFiles(learningOutputDir);
-  if (learningOutputDir !== legacyLearningOutputDir) {
-    await clearLegacyLearningDir(legacyLearningOutputDir);
-  }
+  await clearMarkdownFiles(foundationOutputDir);
 
   for (const post of posts) {
     required(post.slug, "slug");
@@ -486,22 +452,22 @@ async function main() {
     console.log(`Synced ${post.slug}`);
   }
 
-  for (const entry of learningEntries) {
+  for (const entry of foundationEntries) {
     required(entry.slug, "slug");
 
-    const frontmatter = serializeLearningFrontmatter(entry);
+    const frontmatter = serializeFoundationFrontmatter(entry);
     const content = stripLeadingH1(entry.content.trim());
-    const outputPath = path.join(learningOutputDir, `${entry.topicSlug}-${entry.slug}.md`);
+    const outputPath = path.join(foundationOutputDir, `${entry.topicSlug}-${entry.slug}.md`);
 
     await fs.writeFile(outputPath, `${frontmatter.trim()}\n\n${content}\n`);
-    console.log(`Synced learning ${entry.topicSlug}/${entry.slug}`);
+    console.log(`Synced foundation ${entry.topicSlug}/${entry.slug}`);
   }
 
   await fs.rm(astroDataStorePath, { force: true });
 
   console.log(`Synced ${posts.length} published post${posts.length === 1 ? "" : "s"}`);
   console.log(
-    `Synced ${learningEntries.length} learning note${learningEntries.length === 1 ? "" : "s"}`
+    `Synced ${foundationEntries.length} foundation note${foundationEntries.length === 1 ? "" : "s"}`
   );
 }
 

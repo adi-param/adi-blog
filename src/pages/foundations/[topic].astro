@@ -3,11 +3,11 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostList from "../../components/PostList.astro";
 
 export async function getStaticPaths() {
-  const learningEntries = Object.values(
-    import.meta.glob("../../generated/learning/*.md", { eager: true })
+  const foundationEntries = Object.values(
+    import.meta.glob("../../generated/foundations/*.md", { eager: true })
   );
   const topics = [
-    ...learningEntries.reduce<Map<string, string>>((items, entry) => {
+    ...foundationEntries.reduce<Map<string, string>>((items, entry) => {
       items.set(entry.frontmatter.topicSlug, entry.frontmatter.topic);
       return items;
     }, new Map()),
@@ -17,7 +17,7 @@ export async function getStaticPaths() {
     params: { topic: topic.slug },
     props: {
       topic,
-      entries: learningEntries
+      entries: foundationEntries
         .filter((entry) => entry.frontmatter.topicSlug === topic.slug)
         .sort(
           (a, b) =>
@@ -42,8 +42,8 @@ const entryLinks = entries.map((entry) => ({
 ---
 
 <BaseLayout title={`${topic.title} | Adi`} description={description}>
-  <section class="page-header learning-header">
-    <p class="eyebrow">Learning 101</p>
+  <section class="page-header foundation-header">
+    <p class="eyebrow">Foundations</p>
     <h1>{topic.title}</h1>
   </section>
 
@@ -54,7 +54,7 @@ const entryLinks = entries.map((entry) => ({
     </div>
     <PostList
       posts={entryLinks}
-      basePath={`learning-101/${topic.slug}`}
+      basePath={`foundations/${topic.slug}`}
       showTags={false}
       showDate={false}
       emptyMessage="Reference notes will appear here as they are published from the source repo."

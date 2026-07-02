@@ -125,72 +125,6 @@ main {
   text-decoration: none;
 }
 
-.nav-dropdown {
-  position: relative;
-}
-
-.nav-dropdown summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 0.95rem;
-  list-style: none;
-}
-
-.nav-dropdown summary::-webkit-details-marker {
-  display: none;
-}
-
-.nav-dropdown summary::after {
-  display: block;
-  width: 7px;
-  height: 7px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  content: "";
-  opacity: 0.72;
-  transform: translateY(-2px) rotate(45deg);
-  transition:
-    opacity 160ms ease,
-    transform 160ms ease;
-}
-
-.nav-dropdown[open] summary::after {
-  opacity: 1;
-  transform: translateY(2px) rotate(225deg);
-}
-
-.nav-dropdown summary:hover::after {
-  opacity: 1;
-}
-
-.nav-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  z-index: 10;
-  display: grid;
-  min-width: 210px;
-  padding: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
-}
-
-.nav-dropdown-menu a {
-  padding: 8px 10px;
-  border-radius: 6px;
-  white-space: nowrap;
-}
-
-.nav-dropdown-menu a:hover {
-  background: var(--surface-blue);
-  color: var(--link);
-}
-
 .theme-toggle {
   display: inline-flex;
   flex: 0 0 auto;
@@ -639,18 +573,18 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   font-size: 1.08rem;
 }
 
-.learning-header {
+.foundation-header {
   max-width: 820px;
 }
 
-.learning-grid {
+.foundation-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 14px;
   padding: 0 0 84px;
 }
 
-.learning-card {
+.foundation-card {
   display: grid;
   gap: 12px;
   align-content: start;
@@ -659,27 +593,27 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   border-radius: 8px;
 }
 
-.learning-card h2 {
+.foundation-card h2 {
   margin: 0;
   font-size: 1.2rem;
   line-height: 1.25;
 }
 
-.learning-card h2 a {
+.foundation-card h2 a {
   color: var(--text);
   text-decoration: none;
 }
 
-.learning-card h2 a:hover {
+.foundation-card h2 a:hover {
   color: var(--link);
 }
 
-.learning-card p {
+.foundation-card p {
   margin: 0;
   color: var(--muted);
 }
 
-.learning-card ul {
+.foundation-card ul {
   display: grid;
   gap: 6px;
   margin: 0;
@@ -687,17 +621,22 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
   color: var(--muted);
 }
 
-.learning-page {
+.foundation-card span {
+  color: var(--subtle);
+  font-size: 0.9rem;
+}
+
+.foundation-page {
   max-width: 820px;
   padding: 44px 0 84px;
 }
 
-.learning-content > section {
+.foundation-content > section {
   padding-bottom: 8px;
   border-bottom: 1px solid color-mix(in srgb, var(--border), transparent 35%);
 }
 
-.learning-content > section:last-child {
+.foundation-content > section:last-child {
   border-bottom: 0;
 }
 
@@ -1025,11 +964,6 @@ html[data-theme="dark"] .theme-toggle-thumb::before {
 
   .nav-links a {
     flex: 0 0 auto;
-  }
-
-  .nav-dropdown-menu {
-    right: auto;
-    left: 0;
   }
 
   .theme-toggle {

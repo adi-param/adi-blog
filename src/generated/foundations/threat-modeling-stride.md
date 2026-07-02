@@ -4,8 +4,8 @@ description: >-
   A structured reference for using STRIDE to identify spoofing, tampering,
   repudiation, information disclosure, denial of service, and elevation of
   privilege risks.
-date: '2026-07-02T04:52:03.907Z'
-topic: Threat Modeling 101
+date: '2026-07-02T12:54:03+08:00'
+topic: Threat Modeling
 topicSlug: threat-modeling
 entrySlug: stride
 source: >-
