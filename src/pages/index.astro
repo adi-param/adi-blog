@@ -28,12 +28,14 @@ const base = import.meta.env.BASE_URL.endsWith("/")
   </section>
 
   <div class="home-columns">
-    <section class="post-list" aria-label="Recent posts">
+    <section class="home-main" aria-label="Recent posts">
       <div class="section-heading home-section-heading">
         <h2>Latest posts</h2>
         <a href={`${base}posts/`}>View posts</a>
       </div>
-      <PostList posts={recentPosts} emptyMessage="Posts will appear here as they are published." />
+      <div class="home-post-grid">
+        <PostList posts={recentPosts} emptyMessage="Posts will appear here as they are published." />
+      </div>
     </section>
 
     <aside class="home-side" aria-label="Foundations">
